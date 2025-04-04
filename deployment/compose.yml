@@ -1,0 +1,10 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    env_file:
+      - ../.env
+    volumes:
+      - ../sqlite.db:/app/sqlite.db
+      - ../sqlite.db-wal:/app/sqlite.db-wal
