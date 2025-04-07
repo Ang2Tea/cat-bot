@@ -28,7 +28,7 @@ async fn main() {
     env_logger::init();
     log::debug!("Starting command bot...");
 
-    let api_key = std::env::var("THE_CAT_API_KEY").expect("No API key found");
+    let api_key = std::env::var("THE_API_KEY").expect("No API key found");
     let db_urn = std::env::var("DATABASE_URL").expect("No database url found");
 
     let delay_in_sec = {
