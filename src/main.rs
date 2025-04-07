@@ -7,6 +7,7 @@ use cat_bot::{
         ChangeChatDto, ChatCreateUC, ChatGetUC, ChatUpdateUC, GetPictures, PictureGetUC,
         PictureType,
     },
+    shared::ErrorKind,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
 use reqwest::Url;
@@ -163,11 +164,20 @@ where
 {
     let raw_cats = picture_helper.get_picture(Some(picture_type)).await;
 
-    if let Ok(picture_url) = raw_cats {
-        let _ = send_photo(&bot, msg.chat.id.0, &picture_url).await;
-    }
+    match raw_cats {
+        Ok(cats) => send_photo(&bot, msg.chat.id.0, &cats).await.map(|_| ()),
+        Err(err) => {
+            let log_message = match err {
+                ErrorKind::NotFound => String::from("Not found"),
+                ErrorKind::Other(message) => message,
+            };
 
-    Ok(())
+            log::error!("{}", log_message);
+            bot.send_message(msg.chat.id, "Что то пошло не так")
+                .await
+                .map(|_| ())
+        }
+    }
 }
 
 async fn update_user<T>(bot: Bot, msg: Message, chat_helper: Arc<T>) -> ResponseResult<()>
@@ -177,18 +187,11 @@ where
     let result = chat_helper.change_push(msg.chat.id.0).await;
     if let Err(_) = result {
         log::error!("Failed to create user");
+        return Ok(());
     }
 
-    match result.unwrap() {
-        true => bot
-            .send_message(msg.chat.id, "Уведомления включены")
-            .await
-            .map(|_| ()),
-        false => bot
-            .send_message(msg.chat.id, "Уведомления выключены")
-            .await
-            .map(|_| ()),
-    }
+    let message = if result.unwrap() {"Уведомления включены"} else { "Уведомления выключены" };
+    bot.send_message(msg.chat.id, message).await.map(|_| ())
 }
 
 async fn answer<P, C>(
