@@ -1,5 +1,5 @@
-pub mod interface;
-pub mod the_cats_api;
-pub mod models;
-pub mod sql_lite_db;
-pub mod repositories;
+pub mod shared;
+pub mod entities;
+pub mod contracts;
+pub mod usecases;
+pub mod adapters;
