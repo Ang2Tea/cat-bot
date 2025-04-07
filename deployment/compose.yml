@@ -6,5 +6,4 @@ services:
     env_file:
       - ../.env
     volumes:
-      - ../sqlite.db:/app/sqlite.db
-      - ../sqlite.db-wal:/app/sqlite.db-wal
+      - ../data:/app/data

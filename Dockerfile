@@ -7,7 +7,9 @@ ARG APP_NAME
 WORKDIR /app
 
 # Install host build dependencies.
-RUN apk add --no-cache clang lld musl-dev git
+RUN apk add --no-cache clang lld musl-dev git libressl-dev
+
+COPY ./migrations /app/migrations
 
 RUN --mount=type=bind,source=src,target=src \
     --mount=type=bind,source=Cargo.toml,target=Cargo.toml \
@@ -37,6 +39,7 @@ RUN adduser \
     appuser
 USER appuser
 
+COPY ./migrations /app/migrations
 COPY --from=build /bin/server /app/
 
 ENTRYPOINT ["./server"]

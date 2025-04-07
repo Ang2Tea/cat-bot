@@ -1,35 +1,6 @@
-use sqlx::{Sqlite, SqlitePool, migrate::MigrateDatabase};
+use sqlx::SqlitePool;
 
 use crate::{models::ChatDto, repositories::ChatRepository};
-
-pub async fn init_db(db_urn: &str) {
-    if !Sqlite::database_exists(db_urn).await.unwrap_or(false) {
-        match Sqlite::create_database(db_urn).await {
-            Ok(_) => log::info!("Create db success {}", db_urn),
-            Err(error) => log::error!("error: {}", error),
-        }
-    } else {
-        log::debug!("Database already exists");
-    }
-
-    let db = SqlitePool::connect(db_urn).await.unwrap();
-
-    let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
-    let migrations = std::path::Path::new(&crate_dir).join("./migrations");
-
-    let migration_results = sqlx::migrate::Migrator::new(migrations)
-        .await
-        .unwrap()
-        .run(&db)
-        .await;
-
-    match migration_results {
-        Ok(_) => log::debug!("Migration success"),
-        Err(error) => {
-            log::error!("error: {}", error);
-        }
-    }
-}
 
 pub struct SqlLiteChatsRepository {
     pub db: SqlitePool,
@@ -74,10 +45,9 @@ impl ChatRepository for SqlLiteChatsRepository {
     }
 
     async fn get_list_for_push(&self) -> Option<Vec<ChatDto>> {
-        let result =
-            sqlx::query_as::<_, ChatDto>("SELECT * FROM chats WHERE enable_push;")
-                .fetch_all(&self.db)
-                .await;
+        let result = sqlx::query_as::<_, ChatDto>("SELECT * FROM chats WHERE enable_push;")
+            .fetch_all(&self.db)
+            .await;
 
         match result {
             Ok(r) => Some(r),
@@ -108,11 +78,10 @@ impl ChatRepository for SqlLiteChatsRepository {
     }
 
     async fn get_by_id(&self, id: i64) -> Option<ChatDto> {
-        let result =
-            sqlx::query_as::<_, ChatDto>("SELECT * FROM chats WHERE chat_id = ?;")
-                .bind(id)
-                .fetch_one(&self.db)
-                .await;
+        let result = sqlx::query_as::<_, ChatDto>("SELECT * FROM chats WHERE chat_id = ?;")
+            .bind(id)
+            .fetch_one(&self.db)
+            .await;
 
         match result {
             Ok(r) => Some(r),

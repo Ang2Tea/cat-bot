@@ -1,8 +1,10 @@
+mod init_db;
+
 use cat_bot::{
     interface::GetCats,
     models::ChatDto,
     repositories::ChatRepository,
-    sql_lite_db::{self, SqlLiteChatsRepository},
+    sql_lite_db::SqlLiteChatsRepository,
     the_cats_api::TheCatsApi,
 };
 use reqwest::Url;
@@ -27,7 +29,7 @@ async fn main() {
     let api_key = std::env::var("THE_CAT_API_KEY").expect("No API key found");
     let db_urn = std::env::var("DATABASE_URL").expect("No database url found");
 
-    sql_lite_db::init_db(&db_urn).await;
+    init_db::init_db(&db_urn).await;
 
     let db = SqlitePool::connect(&db_urn).await.unwrap();
 
@@ -71,7 +73,7 @@ where
     log::debug!("Starting image writer");
 
     loop {
-        sleep(Duration::from_secs(1 * 60)).await;
+        sleep(Duration::from_secs(30 * 60)).await;
         log::debug!("Writing image");
 
         let users = chat_repository.get_list_for_push().await;

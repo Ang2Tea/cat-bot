@@ -26,3 +26,4 @@ Cargo.lock
 # Project files
 **/.env
 **/sqlite.db*
+**/data
