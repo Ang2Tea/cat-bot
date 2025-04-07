@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    contracts::{
-        AsyncGetPictures, PictureGetUC,
-        models::{ChatDto, PictureType},
-    },
+    contracts::{AsyncGetPictures, ChatDto, PictureGetUC, PictureType},
     entities::repositories::ChatRepository,
     shared::ErrorKind,
 };

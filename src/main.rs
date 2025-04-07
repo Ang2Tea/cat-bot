@@ -1,11 +1,11 @@
 use cat_bot::{
     adapters::{
-        get_pictures::{GetPicturesBox, the_cats_api::TheCatsApi, the_dogs_api::TheDogsApi},
+        get_pictures::{CompositeApi, TheCatsApi, TheDogsApi},
         repositories::sqlite_chat_repository::SqlLiteChatRepository,
     },
     contracts::{
-        ChatCreateUC, ChatGetUC, ChatUpdateUC, GetPictures, PictureGetUC,
-        models::{ChangeChatDto, PictureType},
+        ChangeChatDto, ChatCreateUC, ChatGetUC, ChatUpdateUC, GetPictures, PictureGetUC,
+        PictureType,
     },
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
@@ -53,7 +53,7 @@ async fn main() {
     apis.insert(PictureType::Cat, the_cats_api.clone());
     apis.insert(PictureType::Dog, the_dogs_api.clone());
 
-    let the_apis = Arc::new(GetPicturesBox::new(apis));
+    let the_apis = Arc::new(CompositeApi::new(apis));
 
     let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
     let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
@@ -172,34 +172,14 @@ where
 
 async fn update_user<T>(bot: Bot, msg: Message, chat_helper: Arc<T>) -> ResponseResult<()>
 where
-    T: ChatGetUC + ChatUpdateUC,
+    T: ChatUpdateUC,
 {
-    let user = chat_helper.get_by_id(msg.chat.id.0).await;
-    if let Err(_) = user {
-        log::error!("Failed to get user");
-        return Ok(());
-    }
-
-    let chat_name = msg.chat.username().map(|name| name.to_string());
-    let chat_title = msg.chat.title().map(|name| name.to_string());
-
-    let user = user.unwrap();
-
-    let current_push = !user.enable_push;
-
-    let dto = ChangeChatDto {
-        chat_id: msg.chat.id.0,
-        name: chat_name,
-        title: chat_title,
-        enable_push: current_push,
-    };
-
-    let result = chat_helper.update(dto).await;
+    let result = chat_helper.change_push(msg.chat.id.0).await;
     if let Err(_) = result {
         log::error!("Failed to create user");
     }
 
-    match current_push {
+    match result.unwrap() {
         true => bot
             .send_message(msg.chat.id, "Уведомления включены")
             .await

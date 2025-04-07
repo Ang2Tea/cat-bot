@@ -1,10 +1,7 @@
 use std::sync::Arc;
 
 use crate::{
-    contracts::{
-        ChatCreateUC, ChatGetUC, ChatUpdateUC,
-        models::{ChangeChatDto, ChatDto},
-    },
+    contracts::{ChangeChatDto, ChatCreateUC, ChatDto, ChatGetUC, ChatUpdateUC},
     entities::{chat::Chat, repositories::ChatRepository},
 };
 
@@ -67,13 +64,14 @@ impl<R> ChatUpdateUC for ChatUC<R>
 where
     R: ChatRepository + Send + Sync + 'static,
 {
-    async fn update(&self, dto: ChangeChatDto) -> crate::shared::Result<()> {
-        let mut chat = self.repository.get_by_id(dto.chat_id).await?;
+    async fn change_push(&self, id: i64) -> crate::shared::Result<bool> {
+        let mut chat = self.repository.get_by_id(id).await?;
+        let current_push = !chat.enable_push;
 
-        chat.enable_push = dto.enable_push;
-        chat.name = dto.name;
-        chat.title = dto.title;
+        chat.enable_push = current_push;
 
-        self.repository.update(chat).await
+        self.repository.update(chat).await?;
+
+        Ok(current_push)
     }
 }

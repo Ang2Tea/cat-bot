@@ -1,6 +1,6 @@
 use reqwest::Url;
 
-use crate::contracts::{models::PictureDto, AsyncGetPictures, GetPictures};
+use crate::contracts::{PictureDto, AsyncGetPictures, GetPictures};
 
 use super::map_request_err;
 
@@ -19,9 +19,9 @@ impl TheDogsApi {
 impl AsyncGetPictures for TheDogsApi {
     async fn get_pictures(
         &self,
-        _picture_type: Option<crate::contracts::models::PictureType>,
+        _picture_type: Option<crate::contracts::PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::models::PictureDto>> {
+    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
         let params = [("limit", limit.unwrap_or(1).to_string())];
 
         let url = Url::parse_with_params(GET_DOGS_URL, &params).map_err(map_request_err)?;
@@ -45,9 +45,9 @@ impl AsyncGetPictures for TheDogsApi {
 impl GetPictures for TheDogsApi {
     fn get_pictures(
         &self,
-        _picture_type: Option<crate::contracts::models::PictureType>,
+        _picture_type: Option<crate::contracts::PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::models::PictureDto>> {
+    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
         let params = [("limit", limit.unwrap_or(1).to_string())];
 
         let url = Url::parse_with_params(GET_DOGS_URL, &params).map_err(map_request_err)?;
