@@ -13,9 +13,9 @@ use crate::{
     shared::ErrorKind,
 };
 
-use super::{BotError, commands::Command};
+use super::commands::Command;
 
-type HandlerResult = Result<(), BotError>;
+type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn send_photo(bot: &Bot, chat_id: i64, url: &str) -> HandlerResult {
     let url = Url::parse(url);

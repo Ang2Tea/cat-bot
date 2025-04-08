@@ -50,5 +50,5 @@ async fn main() {
     let write_future = bot::write_image(delay_in_sec, picture_uc.clone());
     tokio::spawn(write_future);
 
-    bot::run(picture_uc, chat_uc).await.dispatch().await;
+    bot::run(picture_uc, chat_uc.clone(), chat_uc.clone()).await.dispatch().await;
 }

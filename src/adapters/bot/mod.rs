@@ -4,7 +4,7 @@ use endpoints::send_photo;
 use teloxide::{Bot, dispatching::DefaultKey, dptree, prelude::Dispatcher};
 use tokio::time::sleep;
 
-use crate::contracts::{ChatCreateUC, ChatGetUC, ChatUpdateUC, PictureGetUC};
+use crate::contracts::{ChatCreateUC, ChatUpdateUC, PictureGetUC};
 
 mod commands;
 mod endpoints;
@@ -12,15 +12,16 @@ mod schemas;
 
 type BotError = Box<dyn std::error::Error + Send + Sync>;
 
-pub async fn run<P, C>(picture_uc: Arc<P>, chat_uc: Arc<C>) -> Dispatcher<Bot, BotError, DefaultKey>
+pub async fn run<P, CC, UC>(picture_uc: Arc<P>, create_chat_uc: Arc<CC>, update_chat_uc: Arc<UC>) -> Dispatcher<Bot, BotError, DefaultKey>
 where
     P: PictureGetUC + Send + Sync + 'static,
-    C: ChatCreateUC + ChatGetUC + ChatUpdateUC + Send + Sync + 'static,
+    CC: ChatCreateUC + Send + Sync + 'static,
+    UC: ChatUpdateUC + Send + Sync + 'static,
 {
     let bot = Bot::from_env();
 
-    Dispatcher::builder(bot, schemas::schema::<P, C>())
-        .dependencies(dptree::deps![picture_uc, chat_uc])
+    Dispatcher::builder(bot, schemas::schema::<P, CC, UC>())
+        .dependencies(dptree::deps![picture_uc, create_chat_uc, update_chat_uc])
         .enable_ctrlc_handler()
         .build()
 }

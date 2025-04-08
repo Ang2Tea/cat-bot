@@ -1,6 +1,7 @@
 use std::{collections::HashMap, sync::Arc};
 
 use rand::Rng;
+use tokio::task::{block_in_place, spawn_blocking};
 
 use crate::{
     contracts::{AsyncGetPictures, GetPictures, PictureType},
@@ -49,15 +50,19 @@ impl AsyncGetPictures for CompositeApi {
             limit += 1;
         }
 
-        let result = self
-            .apis
-            .iter()
-            .flat_map(|(_, api)| {
-                api.get_pictures(picture_type, Some(limit / self.apis.len() as u32))
-                    .unwrap_or_else(|_| Vec::new())
-            })
-            .take(limit as usize)
-            .collect();
+        let mut result = Vec::new();
+        let apis_len = self.apis.len() as u32;
+
+        for (_, api) in self.apis.iter() {
+            let temp_result = block_in_place(move || {
+                api.get_pictures(picture_type, Some(limit / apis_len))
+                    .unwrap_or(Vec::new())
+            });
+
+            result.extend(temp_result);
+        }
+
+        let result = result.into_iter().take(limit as usize).collect();
 
         Ok(result)
     }
