@@ -26,11 +26,7 @@ pub async fn send_photo(bot: &Bot, chat_id: i64, url: &str) -> HandlerResult {
 
     let input_file = InputFile::url(url.unwrap());
 
-    let result = bot.send_photo(ChatId(chat_id), input_file).await;
-    if let Err(err) = result {
-        log::error!("Failed to send photo: {}", err);
-    }
-
+    bot.send_photo(ChatId(chat_id), input_file).await?;
     Ok(())
 }
 
@@ -54,10 +50,9 @@ where
             };
 
             log::error!("{}", log_message);
-            bot.send_message(msg.chat.id, "Что то пошло не так")
-                .await
-                .map(|_| ())
-                .map_err(|err| Box::new(err) as BotError)
+
+            bot.send_message(msg.chat.id, "Что то пошло не так").await?;
+            Ok(())
         }
     }
 }
@@ -82,10 +77,8 @@ where
         log::error!("Failed to create user");
     }
 
-    bot.send_message(msg.chat.id, "Добро пожаловать")
-        .await
-        .map(|_| ())
-        .map_err(|err| Box::new(err) as BotError)
+    bot.send_message(msg.chat.id, "Добро пожаловать").await?;
+    Ok(())
 }
 
 pub async fn get_dog<P>(bot: Bot, msg: Message, picture_helper: Arc<P>) -> HandlerResult
@@ -119,15 +112,11 @@ where
         "Уведомления выключены"
     };
 
-    bot.send_message(msg.chat.id, message)
-        .await
-        .map(|_| ())
-        .map_err(|err| Box::new(err) as BotError)
+    bot.send_message(msg.chat.id, message).await?;
+    Ok(())
 }
 
 pub async fn help(bot: Bot, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, Command::descriptions().to_string())
-        .await
-        .map(|_| ())
-        .map_err(|err| Box::new(err) as BotError)
+    bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
+    Ok(())
 }
