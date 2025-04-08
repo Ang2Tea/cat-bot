@@ -4,24 +4,11 @@ use cat_bot::{
         get_pictures::{CompositeApi, TheCatsApi, TheDogsApi},
         repositories::sqlite_chat_repository::SqlLiteChatRepository,
     },
-    contracts::{
-        ChangeChatDto, ChatCreateUC, ChatGetUC, ChatUpdateUC, GetPictures, PictureGetUC,
-        PictureType,
-    },
-    shared::ErrorKind,
+    contracts::{GetPictures, PictureType},
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
-use reqwest::Url;
 use sqlx::SqlitePool;
-use std::{collections::HashMap, sync::Arc, time::Duration};
-use teloxide::{
-    Bot,
-    prelude::{Requester, ResponseResult},
-    repls::CommandReplExt,
-    types::{ChatId, InputFile, Message},
-    utils::command::BotCommands,
-};
-use tokio::time::sleep;
+use std::{collections::HashMap, sync::Arc};
 
 #[tokio::main]
 async fn main() {
@@ -60,7 +47,7 @@ async fn main() {
     let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
     let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
 
-    let write_future = write_image(bot.clone(), delay_in_sec, picture_uc.clone());
+    let write_future = write_image(delay_in_sec, picture_uc.clone());
     tokio::spawn(write_future);
 
     bot::run(picture_uc, chat_uc).await.dispatch().await;

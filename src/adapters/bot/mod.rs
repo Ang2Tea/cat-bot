@@ -25,10 +25,11 @@ where
         .build()
 }
 
-pub async fn write_image<P>(bot: Bot, delay_in_sec: u64, picture_helper: Arc<P>)
+pub async fn write_image<P>(delay_in_sec: u64, picture_helper: Arc<P>)
 where
     P: PictureGetUC,
 {
+    let bot = Bot::from_env();
     log::debug!("Starting image writer");
 
     loop {

@@ -1,7 +1,4 @@
-use teloxide::{
-    dispatching::{UpdateHandler, dialogue},
-    dptree,
-};
+use teloxide::{dispatching::UpdateHandler, dptree};
 
 use crate::{
     adapters::bot::{commands::Command, endpoints},
@@ -24,5 +21,5 @@ where
         .branch(case![Command::ChangePush].endpoint(endpoints::change_push::<C>))
         .branch(case![Command::Help].endpoint(endpoints::help));
 
-    dialogue::enter::<_, _, _, _>().branch(command_handler)
+    command_handler
 }
