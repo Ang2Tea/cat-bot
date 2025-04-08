@@ -1,6 +1,6 @@
 use cat_bot::{
     adapters::{
-        bot::{self, write_image},
+        bot,
         get_pictures::{CompositeApi, TheCatsApi, TheDogsApi},
         repositories::sqlite_chat_repository::SqlLiteChatRepository,
     },
@@ -47,7 +47,7 @@ async fn main() {
     let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
     let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
 
-    let write_future = write_image(delay_in_sec, picture_uc.clone());
+    let write_future = bot::write_image(delay_in_sec, picture_uc.clone());
     tokio::spawn(write_future);
 
     bot::run(picture_uc, chat_uc).await.dispatch().await;
