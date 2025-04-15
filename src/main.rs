@@ -3,7 +3,10 @@ use cat_bot::{
         bot,
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
         repositories::sqlite_chat_repository::SqlLiteChatRepository,
-    }, configs, contracts::PictureType, usecases::{chat_uc::ChatUC, picture_uc::PictureUC}
+    },
+    configs,
+    contracts::PictureType,
+    usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
 use sqlx::SqlitePool;
 use std::{collections::HashMap, sync::Arc};
@@ -37,6 +40,5 @@ async fn main() {
     let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
     let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
 
-    bot::run(config, picture_uc, chat_uc.clone(), chat_uc.clone())
-        .await;
+    bot::run(config, picture_uc, chat_uc.clone(), chat_uc.clone()).await
 }
