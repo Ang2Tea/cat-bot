@@ -8,7 +8,7 @@ use cat_bot::{
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
-use sqlx::SqlitePool;
+use sqlx::Sqlite;
 use std::{collections::HashMap, sync::Arc};
 
 #[tokio::main]
@@ -20,11 +20,9 @@ async fn main() {
 
     let config = configs::init_config();
 
-    cat_bot::adapters::repositories::init_db(&config.db_url)
+    let db = cat_bot::adapters::repositories::init_db::<Sqlite>(&config.db_url)
         .await
         .unwrap();
-
-    let db = SqlitePool::connect(&config.db_url).await.unwrap();
 
     let chat_repository = Arc::new(SqlLiteChatRepository::new(db));
 
