@@ -3,16 +3,18 @@ use std::{collections::HashMap, sync::Arc};
 use rand::Rng;
 
 use crate::{
-    contracts::{AsyncGetPictures, GetPictures, PictureType},
+    contracts::{AsyncGetPictures, PictureType},
     shared::ErrorKind,
 };
 
+use super::get_picture_enum::GetPictureEnum;
+
 pub struct CompositeApi {
-    apis: HashMap<PictureType, Arc<dyn GetPictures + Send + Sync + 'static>>,
+    apis: HashMap<PictureType, Arc<GetPictureEnum>>,
 }
 
 impl CompositeApi {
-    pub fn new(apis: HashMap<PictureType, Arc<dyn GetPictures + Send + Sync + 'static>>) -> Self {
+    pub fn new(apis: HashMap<PictureType, Arc<GetPictureEnum>>) -> Self {
         Self { apis }
     }
 
@@ -42,22 +44,26 @@ impl AsyncGetPictures for CompositeApi {
                 .apis
                 .get(&picture_type)
                 .ok_or(ErrorKind::NotFound)?
-                .get_pictures(Some(picture_type), Some(limit));
+                .get_pictures(Some(picture_type), Some(limit))
+                .await;
         };
 
         while limit % self.apis.len() as u32 != 0 {
             limit += 1;
         }
 
-        let result = self
-            .apis
-            .iter()
-            .flat_map(|(_, api)| {
-                api.get_pictures(picture_type, Some(limit / self.apis.len() as u32))
-                    .unwrap_or_else(|_| Vec::new())
-            })
-            .take(limit as usize)
-            .collect();
+        let mut result = Vec::new();
+        let apis_len = self.apis.len() as u32;
+
+        for (_, api) in self.apis.iter() {
+            let temp_result = api
+                .get_pictures(picture_type, Some(limit / apis_len))
+                .await?;
+
+            result.extend(temp_result);
+        }
+
+        let result = result.into_iter().take(limit as usize).collect();
 
         Ok(result)
     }
