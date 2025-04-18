@@ -26,7 +26,7 @@ FROM alpine:latest AS final
 
 WORKDIR /app
 
-ENV TZ Europe/Moscow
+ENV TZ=Europe/Moscow
 
 ARG UID=10001
 RUN adduser \
