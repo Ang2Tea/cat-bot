@@ -1,13 +1,14 @@
-use crate::contracts::AsyncGetPictures;
+use crate::contracts::GetPictures;
 
 use super::{TheCatsApi, TheDogsApi};
 
+#[derive(Debug, Clone)]
 pub enum GetPictureEnum {
     Cat(TheCatsApi),
     Dog(TheDogsApi),
 }
 
-impl AsyncGetPictures for GetPictureEnum {
+impl GetPictures for GetPictureEnum {
     async fn get_pictures(
         &self,
         picture_type: Option<crate::contracts::PictureType>,

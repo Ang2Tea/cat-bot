@@ -3,12 +3,13 @@ use std::{collections::HashMap, sync::Arc};
 use rand::Rng;
 
 use crate::{
-    contracts::{AsyncGetPictures, PictureType},
+    contracts::{GetPictures, PictureType},
     shared::ErrorKind,
 };
 
 use super::get_picture_enum::GetPictureEnum;
 
+#[derive(Clone)]
 pub struct CompositeApi {
     apis: HashMap<PictureType, Arc<GetPictureEnum>>,
 }
@@ -29,7 +30,7 @@ impl CompositeApi {
     }
 }
 
-impl AsyncGetPictures for CompositeApi {
+impl GetPictures for CompositeApi {
     async fn get_pictures(
         &self,
         picture_type: Option<PictureType>,

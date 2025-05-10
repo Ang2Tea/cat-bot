@@ -1,14 +1,15 @@
 use std::sync::Arc;
 
 use crate::{
-    contracts::{AsyncGetPictures, ChatDto, PictureGetUC, PictureType},
+    contracts::{GetPictures, ChatDto, PictureGetUC, PictureType},
     entities::repositories::ChatRepository,
     shared::ErrorKind,
 };
 
+#[derive(Debug, Clone)]
 pub struct PictureUC<A, R>
 where
-    A: AsyncGetPictures,
+    A: GetPictures,
     R: ChatRepository,
 {
     chat_repository: Arc<R>,
@@ -17,7 +18,7 @@ where
 
 impl<A, R> PictureUC<A, R>
 where
-    A: AsyncGetPictures,
+    A: GetPictures,
     R: ChatRepository,
 {
     pub fn new(get_pictures: Arc<A>, chat_repository: Arc<R>) -> Self {
@@ -30,7 +31,7 @@ where
 
 impl<A, R> PictureGetUC for PictureUC<A, R>
 where
-    A: AsyncGetPictures + Send + Sync + 'static,
+    A: GetPictures + Send + Sync + 'static,
     R: ChatRepository + Send + Sync + 'static,
 {
     async fn get_picture(

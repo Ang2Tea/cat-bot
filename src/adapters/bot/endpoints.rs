@@ -73,7 +73,7 @@ where
 
     let result = chat_helper.create(dto).await;
 
-    if let Err(_) = result {
+    if result.is_err() {
         log::error!("Failed to create user");
     }
 
@@ -101,7 +101,7 @@ where
     T: ChatUpdateUC,
 {
     let result = chat_helper.change_push(msg.chat.id.0).await;
-    if let Err(_) = result {
+    if result.is_err() {
         log::error!("Failed to create user");
         return Ok(());
     }

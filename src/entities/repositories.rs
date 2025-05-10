@@ -1,7 +1,7 @@
 use super::chat::Chat;
 use crate::shared::Result;
 
-pub trait Repository {
+pub trait Repository: Clone + Send + Sync + 'static {
     type Model;
     type Id;
 

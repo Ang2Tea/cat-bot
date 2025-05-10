@@ -1,11 +1,12 @@
 use reqwest::Url;
 
-use crate::contracts::{PictureDto, AsyncGetPictures, GetPictures};
+use crate::contracts::{PictureDto, GetPictures};
 
 use super::map_request_err;
 
 const GET_DOGS_URL: &str = "https://api.thedogapi.com/v1/images/search";
 
+#[derive(Debug, Clone)]
 pub struct TheDogsApi {
     api_key: String,
 }
@@ -16,7 +17,7 @@ impl TheDogsApi {
     }
 }
 
-impl AsyncGetPictures for TheDogsApi {
+impl GetPictures for TheDogsApi {
     async fn get_pictures(
         &self,
         _picture_type: Option<crate::contracts::PictureType>,
@@ -36,30 +37,6 @@ impl AsyncGetPictures for TheDogsApi {
             .map_err(map_request_err)?
             .json()
             .await
-            .map_err(map_request_err)?;
-
-        Ok(dogs)
-    }
-}
-
-impl GetPictures for TheDogsApi {
-    fn get_pictures(
-        &self,
-        _picture_type: Option<crate::contracts::PictureType>,
-        limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
-        let params = [("limit", limit.unwrap_or(1).to_string())];
-
-        let url = Url::parse_with_params(GET_DOGS_URL, &params).map_err(map_request_err)?;
-
-        let client = reqwest::blocking::Client::new();
-
-        let dogs= client
-            .get(url)
-            .header("x-api-key", &self.api_key)
-            .send()
-            .map_err(map_request_err)?
-            .json()
             .map_err(map_request_err)?;
 
         Ok(dogs)

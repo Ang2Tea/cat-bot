@@ -9,9 +9,9 @@ use super::BotError;
 
 pub fn schema<P, CC, UC>() -> UpdateHandler<BotError>
 where
-    P: PictureGetUC + Send + Sync + 'static,
-    CC: ChatCreateUC + Send + Sync + 'static,
-    UC: ChatUpdateUC + Send + Sync + 'static,
+    P: PictureGetUC,
+    CC: ChatCreateUC,
+    UC: ChatUpdateUC,
 {
     use dptree::case;
 

@@ -21,9 +21,9 @@ pub async fn run<P, CC, UC>(
     create_chat_uc: Arc<CC>,
     update_chat_uc: Arc<UC>,
 ) where
-    P: PictureGetUC + Send + Sync + 'static,
-    CC: ChatCreateUC + Send + Sync + 'static,
-    UC: ChatUpdateUC + Send + Sync + 'static,
+    P: PictureGetUC,
+    CC: ChatCreateUC,
+    UC: ChatUpdateUC,
 {
     let bot = Bot::from_env();
 
@@ -49,7 +49,7 @@ where
         log::debug!("Writing image");
 
         let chats = picture_helper.get_picture_for_notification().await;
-        if let Err(_) = chats {
+        if chats.is_err() {
             log::warn!("Failed to get chats");
             continue;
         }
