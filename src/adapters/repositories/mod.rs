@@ -1,7 +1,9 @@
+use std::path::Path;
+
 use crate::shared::{self, ErrorKind};
 use sqlx::{
     Database, Pool,
-    migrate::{Migrate, MigrateDatabase},
+    migrate::{Migrate, MigrateDatabase, Migrator},
 };
 
 #[cfg(feature = "postgres")]
@@ -27,7 +29,9 @@ where
 
     let db = Pool::<DB>::connect(db_urn).await.unwrap();
 
-    let migration_results = sqlx::migrate!().run(&db).await;
+    let migration_results = Migrator::new(Path::new("./migrations")).await
+        .map_err(|e| e.to_string())?
+        .run(&db).await;
 
     match migration_results {
         Ok(_) => Ok(db),
