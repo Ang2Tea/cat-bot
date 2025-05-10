@@ -3,10 +3,18 @@ use sqlx::{
     Database, Pool,
     migrate::{Migrate, MigrateDatabase},
 };
-pub mod sqlite_chat_repository;
-pub mod postgres_chat_repository;
 
-pub async fn init_db<DB>(db_urn: &str) -> Result<Pool<DB>, String>
+#[cfg(feature = "postgres")]
+#[path = "postgres_chat_repository.rs"]
+mod chat_repository;
+
+#[cfg(feature = "sqlite")]
+#[path = "sqlite_chat_repository.rs"]
+mod chat_repository;
+
+pub use chat_repository::*;
+
+async fn inner_init_db<DB>(db_urn: &str) -> Result<Pool<DB>, String>
 where
     DB: Database + MigrateDatabase,
     <DB as sqlx::Database>::Connection: Migrate,

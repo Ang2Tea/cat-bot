@@ -1,23 +1,30 @@
 use crate::{
     entities::{
         chat::Chat,
-        repositories::{ChatRepository, Repository},
+        repositories::{ChatRepository as IChatRepository, Repository},
     },
     shared::Result,
 };
-use sqlx::PgPool;
+use sqlx::{PgPool, Postgres};
 
-pub struct PostgresChatRepository {
+use super::inner_init_db;
+
+pub async fn init_db(db_urn: &str) -> std::result::Result<PgPool, String> {
+    inner_init_db::<Postgres>(db_urn).await
+}
+
+#[derive(Debug, Clone)]
+pub struct ChatRepository {
     pub db: PgPool,
 }
 
-impl PostgresChatRepository {
+impl ChatRepository {
     pub fn new(db: PgPool) -> Self {
         Self { db }
     }
 }
 
-impl Repository for PostgresChatRepository {
+impl Repository for ChatRepository {
     type Model = Chat;
     type Id = i64;
 
@@ -63,7 +70,7 @@ impl Repository for PostgresChatRepository {
     }
 }
 
-impl ChatRepository for PostgresChatRepository {
+impl IChatRepository for ChatRepository {
     async fn get_list_for_push(&self) -> Result<Vec<Chat>> {
         let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)

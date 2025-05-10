@@ -1,23 +1,30 @@
 use crate::{
     entities::{
         chat::Chat,
-        repositories::{ChatRepository, Repository},
+        repositories::{ChatRepository as IChatRepository, Repository},
     },
     shared::Result,
 };
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, Sqlite};
 
-pub struct SqlLiteChatRepository {
+use super::inner_init_db;
+
+pub async fn init_db(db_urn: &str) -> std::result::Result<SqlitePool, String> {
+    inner_init_db::<Sqlite>(db_urn).await
+}
+
+#[derive(Debug, Clone)]
+pub struct ChatRepository {
     pub db: SqlitePool,
 }
 
-impl SqlLiteChatRepository {
+impl ChatRepository {
     pub fn new(db: SqlitePool) -> Self {
         Self { db }
     }
 }
 
-impl Repository for SqlLiteChatRepository {
+impl Repository for ChatRepository {
     type Model = Chat;
     type Id = i64;
 
@@ -63,7 +70,7 @@ impl Repository for SqlLiteChatRepository {
     }
 }
 
-impl ChatRepository for SqlLiteChatRepository {
+impl IChatRepository for ChatRepository {
     async fn get_list_for_push(&self) -> Result<Vec<Chat>> {
         let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)
