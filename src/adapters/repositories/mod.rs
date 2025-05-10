@@ -4,7 +4,7 @@ use sqlx::{
     migrate::{Migrate, MigrateDatabase},
 };
 pub mod sqlite_chat_repository;
-// pub mod sqlx_repository;
+pub mod postgres_chat_repository;
 
 pub async fn init_db<DB>(db_urn: &str) -> Result<Pool<DB>, String>
 where
