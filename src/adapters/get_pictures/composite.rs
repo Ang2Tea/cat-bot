@@ -1,14 +1,18 @@
-use std::{collections::HashMap, sync::Arc};
-
-use rand::Rng;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+    u64,
+};
 
 use crate::{
-    contracts::{AsyncGetPictures, PictureType},
-    shared::ErrorKind,
+    contracts::{GetPictures, PictureDto, PictureType},
+    shared::GetPictureError,
 };
 
 use super::get_picture_enum::GetPictureEnum;
 
+#[derive(Clone)]
 pub struct CompositeApi {
     apis: HashMap<PictureType, Arc<GetPictureEnum>>,
 }
@@ -19,9 +23,16 @@ impl CompositeApi {
     }
 
     fn get_random_picture_type(&self) -> PictureType {
-        let mut rng = rand::rng();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::from_secs(1))
+            .as_secs();
 
-        match rng.random_range(0..2) {
+        // Перевести в минуты
+        let total_minutes = now / 60;
+        let count = u64::try_from(self.apis.iter().count()).unwrap_or(u64::MAX);
+
+        match total_minutes % count {
             0 => PictureType::Cat,
             1 => PictureType::Dog,
             _ => PictureType::Dog,
@@ -29,12 +40,12 @@ impl CompositeApi {
     }
 }
 
-impl AsyncGetPictures for CompositeApi {
+impl GetPictures for CompositeApi {
     async fn get_pictures(
         &self,
         picture_type: Option<PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
+    ) -> Result<Vec<PictureDto>, GetPictureError> {
         let mut limit = limit.unwrap_or(1);
 
         if limit <= 1 {
@@ -43,7 +54,7 @@ impl AsyncGetPictures for CompositeApi {
             return self
                 .apis
                 .get(&picture_type)
-                .ok_or(ErrorKind::NotFound)?
+                .ok_or(GetPictureError::UnknownApi)?
                 .get_pictures(Some(picture_type), Some(limit))
                 .await;
         };
