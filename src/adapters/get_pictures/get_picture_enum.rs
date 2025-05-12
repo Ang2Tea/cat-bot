@@ -1,4 +1,4 @@
-use crate::contracts::GetPictures;
+use crate::{contracts::{GetPictures, PictureDto}, shared::GetPictureError};
 
 use super::{TheCatsApi, TheDogsApi};
 
@@ -13,7 +13,7 @@ impl GetPictures for GetPictureEnum {
         &self,
         picture_type: Option<crate::contracts::PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>>{
+    ) -> Result<Vec<PictureDto>, GetPictureError>{
         match self {
             GetPictureEnum::Cat(api) => api.get_pictures(picture_type, limit).await,
             GetPictureEnum::Dog(api) => api.get_pictures(picture_type, limit).await,

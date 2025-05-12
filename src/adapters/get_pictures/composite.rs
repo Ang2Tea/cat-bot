@@ -2,10 +2,7 @@ use std::{collections::HashMap, sync::Arc};
 
 use rand::Rng;
 
-use crate::{
-    contracts::{GetPictures, PictureType},
-    shared::ErrorKind,
-};
+use crate::{contracts::{GetPictures, PictureDto, PictureType}, shared::GetPictureError};
 
 use super::get_picture_enum::GetPictureEnum;
 
@@ -35,7 +32,7 @@ impl GetPictures for CompositeApi {
         &self,
         picture_type: Option<PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
+    ) -> Result<Vec<PictureDto>, GetPictureError> {
         let mut limit = limit.unwrap_or(1);
 
         if limit <= 1 {
@@ -44,7 +41,7 @@ impl GetPictures for CompositeApi {
             return self
                 .apis
                 .get(&picture_type)
-                .ok_or(ErrorKind::NotFound)?
+                .ok_or(GetPictureError::UnknownApi)?
                 .get_pictures(Some(picture_type), Some(limit))
                 .await;
         };

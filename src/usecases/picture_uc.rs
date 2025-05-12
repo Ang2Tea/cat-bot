@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use crate::{
-    contracts::{GetPictures, ChatDto, PictureGetUC, PictureType},
+    contracts::{ChatDto, GetPictures, PictureGetUC, PictureType},
     entities::repositories::ChatRepository,
-    shared::ErrorKind,
+    shared::GetPictureError,
 };
 
 #[derive(Debug, Clone)]
@@ -37,18 +37,18 @@ where
     async fn get_picture(
         &self,
         picture_type: Option<PictureType>,
-    ) -> crate::shared::Result<String> {
+    ) -> Result<String, GetPictureError> {
         let pictures = self
             .get_pictures
             .get_pictures(picture_type, Some(1))
             .await?;
 
-        let first = pictures.first().ok_or(ErrorKind::NotFound)?;
+        let first = pictures.first().ok_or(GetPictureError::NotFound)?;
 
         Ok(first.url.clone())
     }
 
-    async fn get_picture_for_notification(&self) -> crate::shared::Result<Vec<(String, ChatDto)>> {
+    async fn get_picture_for_notification(&self) -> Result<Vec<(String, ChatDto)>, GetPictureError> {
         let chats = self.chat_repository.get_list_for_push().await?;
 
         let pictures = self

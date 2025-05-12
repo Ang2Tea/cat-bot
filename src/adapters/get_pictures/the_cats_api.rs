@@ -1,8 +1,11 @@
 use reqwest::Url;
 
-use crate::contracts::{GetPictures, PictureDto};
+use crate::{
+    contracts::{GetPictures, PictureDto},
+    shared::GetPictureError,
+};
 
-use super::map_request_err;
+use super::get_errors;
 
 const GET_CATS_URL: &str = "https://api.thecatapi.com/v1/images/search";
 
@@ -22,10 +25,11 @@ impl GetPictures for TheCatsApi {
         &self,
         _picture_type: Option<crate::contracts::PictureType>,
         limit: Option<u32>,
-    ) -> crate::shared::Result<Vec<crate::contracts::PictureDto>> {
+    ) -> Result<Vec<PictureDto>, GetPictureError> {
         let params = [("limit", limit.unwrap_or(1).to_string())];
 
-        let url = Url::parse_with_params(GET_CATS_URL, &params).map_err(map_request_err)?;
+        let url = Url::parse_with_params(GET_CATS_URL, &params)
+            .map_err(|_| GetPictureError::IncorrectUrl)?;
 
         let client = reqwest::Client::new();
 
@@ -34,10 +38,10 @@ impl GetPictures for TheCatsApi {
             .header("x-api-key", &self.api_key)
             .send()
             .await
-            .map_err(map_request_err)?
+            .map_err(get_errors)?
             .json()
             .await
-            .map_err(map_request_err)?;
+            .map_err(get_errors)?;
 
         Ok(cats)
     }

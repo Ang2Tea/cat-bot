@@ -8,10 +8,7 @@ use teloxide::{
     utils::command::BotCommands,
 };
 
-use crate::{
-    contracts::{ChangeChatDto, ChatCreateUC, ChatUpdateUC, PictureGetUC, PictureType},
-    shared::ErrorKind,
-};
+use crate::contracts::{ChangeChatDto, ChatCreateUC, ChatUpdateUC, PictureGetUC, PictureType};
 
 use super::commands::Command;
 
@@ -44,12 +41,7 @@ where
     match raw_cats {
         Ok(cats) => send_photo(&bot, msg.chat.id.0, &cats).await.map(|_| ()),
         Err(err) => {
-            let log_message = match err {
-                ErrorKind::NotFound => String::from("Not found"),
-                ErrorKind::Other(message) => message,
-            };
-
-            log::error!("{}", log_message);
+            log::error!("{}", err);
 
             bot.send_message(msg.chat.id, "Что то пошло не так").await?;
             Ok(())
@@ -61,8 +53,8 @@ pub async fn start<R>(bot: Bot, chat_helper: Arc<R>, msg: Message) -> HandlerRes
 where
     R: ChatCreateUC,
 {
-    let chat_name = msg.chat.username().map(|name| name.to_string());
-    let chat_title = msg.chat.title().map(|name| name.to_string());
+    let chat_name = msg.chat.username().map(String::from);
+    let chat_title = msg.chat.title().map(String::from);
 
     let dto = ChangeChatDto {
         chat_id: msg.chat.id.0,
@@ -73,8 +65,9 @@ where
 
     let result = chat_helper.create(dto).await;
 
-    if result.is_err() {
-        log::error!("Failed to create user");
+    if let Err(err) = result {
+        log::error!("{}", err);
+        return Ok(());
     }
 
     bot.send_message(msg.chat.id, "Добро пожаловать").await?;
@@ -95,14 +88,14 @@ where
     get_picture(bot, msg, PictureType::Cat, picture_helper).await
 }
 
-
 pub async fn change_push<T>(bot: Bot, msg: Message, chat_helper: Arc<T>) -> HandlerResult
 where
     T: ChatUpdateUC,
 {
     let result = chat_helper.change_push(msg.chat.id.0).await;
-    if result.is_err() {
-        log::error!("Failed to create user");
+
+    if let Err(err) = result {
+        log::error!("{}", err);
         return Ok(());
     }
 
@@ -117,6 +110,7 @@ where
 }
 
 pub async fn help(bot: Bot, msg: Message) -> HandlerResult {
-    bot.send_message(msg.chat.id, Command::descriptions().to_string()).await?;
+    bot.send_message(msg.chat.id, Command::descriptions().to_string())
+        .await?;
     Ok(())
 }
