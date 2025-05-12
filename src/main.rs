@@ -2,7 +2,7 @@ use cat_bot::{
     adapters::{
         bot,
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::{self, ChatRepository},
+        repositories::postgres as db,
     },
     configs,
     contracts::PictureType,
@@ -19,11 +19,9 @@ async fn main() {
 
     let config = configs::init_config();
 
-    let db = repositories::init_db(&config.db_url)
-        .await
-        .unwrap();
+    let db = db::init_db(&config.db_url).await.unwrap();
 
-    let chat_repository = Arc::new(ChatRepository::new(db));
+    let chat_repository = Arc::new(db::ChatRepository::new(db));
 
     let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
     let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));

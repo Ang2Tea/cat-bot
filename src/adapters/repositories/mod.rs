@@ -1,21 +1,16 @@
+#[cfg(feature = "postgres")]
+pub mod postgres;
+
+#[cfg(feature = "sqlite")]
+pub mod sqlite;
+
 use std::path::Path;
 
+use crate::shared::{CreateChatError, GetChatError, UpdateChatError};
 use sqlx::{
     Database, Error, Pool,
     migrate::{Migrate, MigrateDatabase, Migrator},
 };
-
-#[cfg(feature = "postgres")]
-#[path = "postgres_chat_repository.rs"]
-mod chat_repository;
-
-#[cfg(feature = "sqlite")]
-#[path = "sqlite_chat_repository.rs"]
-mod chat_repository;
-
-pub use chat_repository::*;
-
-use crate::shared::{CreateChatError, GetChatError, UpdateChatError};
 
 async fn inner_init_db<DB>(db_urn: &str, migration_path: Option<&str>) -> Result<Pool<DB>, String>
 where

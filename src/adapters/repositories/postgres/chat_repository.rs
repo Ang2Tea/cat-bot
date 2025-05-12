@@ -1,20 +1,17 @@
 use crate::{
+    adapters::repositories,
     entities::{chat::Chat, repositories::ChatRepository as IChatRepository},
     shared::{CreateChatError, GetChatError, UpdateChatError},
 };
-use sqlx::{PgPool, Postgres};
-
-pub async fn init_db(db_urn: &str) -> std::result::Result<PgPool, String> {
-    super::inner_init_db::<Postgres>(db_urn, Some("./migrations/postgres")).await
-}
+use sqlx::{Pool, Postgres};
 
 #[derive(Debug, Clone)]
 pub struct ChatRepository {
-    pub db: PgPool,
+    pub db: Pool<Postgres>,
 }
 
 impl ChatRepository {
-    pub fn new(db: PgPool) -> Self {
+    pub fn new(db: Pool<Postgres>) -> Self {
         Self { db }
     }
 }
@@ -28,7 +25,7 @@ impl IChatRepository for ChatRepository {
             .execute(&self.db)
             .await;
 
-        let _ = t.map_err(super::create_errors)?;
+        let _ = t.map_err(repositories::create_errors)?;
 
         Ok(())
     }
@@ -37,7 +34,7 @@ impl IChatRepository for ChatRepository {
         sqlx::query_as::<_, Chat>("SELECT * FROM chats;")
             .fetch_all(&self.db)
             .await
-            .map_err(super::get_errors)
+            .map_err(repositories::get_errors)
     }
 
     async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
@@ -45,7 +42,7 @@ impl IChatRepository for ChatRepository {
             .bind(id)
             .fetch_one(&self.db)
             .await
-            .map_err(super::get_errors)
+            .map_err(repositories::get_errors)
     }
 
     async fn update(&self, input: Chat) -> Result<(), UpdateChatError> {
@@ -58,7 +55,7 @@ impl IChatRepository for ChatRepository {
         .bind(input.chat_id)
         .execute(&self.db)
         .await
-        .map_err(super::update_errors)?;
+        .map_err(repositories::update_errors)?;
 
         Ok(())
     }
@@ -67,6 +64,6 @@ impl IChatRepository for ChatRepository {
         sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)
             .await
-            .map_err(super::get_errors)
+            .map_err(repositories::get_errors)
     }
 }

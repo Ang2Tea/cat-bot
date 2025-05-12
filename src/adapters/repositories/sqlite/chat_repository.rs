@@ -1,17 +1,17 @@
-use crate::{entities::{chat::Chat, repositories::ChatRepository as IChatRepository}, shared::{CreateChatError, GetChatError, UpdateChatError}};
-use sqlx::{Sqlite, SqlitePool};
-
-pub async fn init_db(db_urn: &str) -> std::result::Result<SqlitePool, String> {
-    super::inner_init_db::<Sqlite>(db_urn, Some("./migrations/sqlite")).await
-}
+use crate::{
+    adapters::repositories,
+    entities::{chat::Chat, repositories::ChatRepository as IChatRepository},
+    shared::{CreateChatError, GetChatError, UpdateChatError},
+};
+use sqlx::{Pool, Sqlite};
 
 #[derive(Debug, Clone)]
 pub struct ChatRepository {
-    pub db: SqlitePool,
+    pub db: Pool<Sqlite>,
 }
 
 impl ChatRepository {
-    pub fn new(db: SqlitePool) -> Self {
+    pub fn new(db: Pool<Sqlite>) -> Self {
         Self { db }
     }
 }
@@ -24,16 +24,16 @@ impl IChatRepository for ChatRepository {
             .bind(input.title)
             .execute(&self.db)
             .await
-            .map_err(super::create_errors);
+            .map_err(repositories::create_errors);
 
-            Ok(())
+        Ok(())
     }
 
     async fn get_list(&self) -> Result<Vec<Chat>, GetChatError> {
         let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats;")
             .fetch_all(&self.db)
             .await
-            .map_err(super::get_errors);
+            .map_err(repositories::get_errors);
 
         result
     }
@@ -43,7 +43,7 @@ impl IChatRepository for ChatRepository {
             .bind(id)
             .fetch_one(&self.db)
             .await
-            .map_err(super::get_errors);
+            .map_err(repositories::get_errors);
 
         result
     }
@@ -57,7 +57,7 @@ impl IChatRepository for ChatRepository {
                 .bind(input.chat_id)
                 .execute(&self.db)
                 .await
-                .map_err(super::update_errors)?;
+                .map_err(repositories::update_errors)?;
 
         Ok(())
     }
@@ -66,7 +66,7 @@ impl IChatRepository for ChatRepository {
         let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)
             .await
-            .map_err(super::get_errors);
+            .map_err(repositories::get_errors);
 
         result
     }
