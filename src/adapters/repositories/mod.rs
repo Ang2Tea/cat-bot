@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use sqlx::{
-    Database, Pool,
+    Database, Error, Pool,
     migrate::{Migrate, MigrateDatabase, Migrator},
 };
 
@@ -15,7 +15,9 @@ mod chat_repository;
 
 pub use chat_repository::*;
 
-async fn inner_init_db<DB>(db_urn: &str) -> Result<Pool<DB>, String>
+use crate::shared::{CreateChatError, GetChatError, UpdateChatError};
+
+async fn inner_init_db<DB>(db_urn: &str, migration_path: Option<&str>) -> Result<Pool<DB>, String>
 where
     DB: Database + MigrateDatabase,
     <DB as sqlx::Database>::Connection: Migrate,
@@ -28,12 +30,37 @@ where
 
     let db = Pool::<DB>::connect(db_urn).await.unwrap();
 
-    let migration_results = Migrator::new(Path::new("./migrations")).await
+    let migration_path = migration_path.unwrap_or("./migrations");
+
+    let migration_results = Migrator::new(Path::new(migration_path))
+        .await
         .map_err(|e| e.to_string())?
-        .run(&db).await;
+        .run(&db)
+        .await;
 
     match migration_results {
         Ok(_) => Ok(db),
         Err(error) => Err(error.to_string()),
+    }
+}
+
+fn create_errors(e: Error) -> CreateChatError {
+    match e {
+        Error::Database(err) if err.constraint().is_some() => CreateChatError::Duplicate,
+        _ => CreateChatError::Other(e.to_string()),
+    }
+}
+
+fn get_errors(e: Error) -> GetChatError {
+    match e {
+        Error::RowNotFound => GetChatError::NotFound,
+        _ => GetChatError::Other(e.to_string()),
+    }
+}
+
+fn update_errors(e: Error) -> UpdateChatError {
+    match e {
+        Error::RowNotFound => UpdateChatError::GetChatError(GetChatError::NotFound),
+        _ => UpdateChatError::Other(e.to_string()),
     }
 }

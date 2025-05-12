@@ -1,16 +1,11 @@
 use crate::{
-    entities::{
-        chat::Chat,
-        repositories::{ChatRepository as IChatRepository, Repository},
-    },
-    shared::Result,
+    entities::{chat::Chat, repositories::ChatRepository as IChatRepository},
+    shared::{CreateChatError, GetChatError, UpdateChatError},
 };
 use sqlx::{PgPool, Postgres};
 
-use super::inner_init_db;
-
 pub async fn init_db(db_urn: &str) -> std::result::Result<PgPool, String> {
-    inner_init_db::<Postgres>(db_urn).await
+    super::inner_init_db::<Postgres>(db_urn, Some("./migrations/postgres")).await
 }
 
 #[derive(Debug, Clone)]
@@ -24,58 +19,54 @@ impl ChatRepository {
     }
 }
 
-impl Repository for ChatRepository {
-    type Model = Chat;
-    type Id = i64;
-
-    async fn create(&self, input: Self::Model) -> crate::shared::Result<()> {
-        let result = sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES (?, ?, ?);")
+impl IChatRepository for ChatRepository {
+    async fn create(&self, input: Chat) -> Result<(), CreateChatError> {
+        let t = sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES ($1, $2, $3);")
             .bind(input.chat_id)
             .bind(input.name)
             .bind(input.title)
             .execute(&self.db)
             .await;
 
-        super::map_result(result.map(|_| ()))
+        let _ = t.map_err(super::create_errors)?;
+
+        Ok(())
     }
 
-    async fn get_list(&self) -> crate::shared::Result<Vec<Self::Model>> {
-        let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats;")
+    async fn get_list(&self) -> Result<Vec<Chat>, GetChatError> {
+        sqlx::query_as::<_, Chat>("SELECT * FROM chats;")
             .fetch_all(&self.db)
-            .await;
-
-        super::map_result(result)
+            .await
+            .map_err(super::get_errors)
     }
 
-    async fn get_by_id(&self, id: Self::Id) -> crate::shared::Result<Self::Model> {
-        let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE chat_id = ?;")
+    async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
+        sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE chat_id = $1;")
             .bind(id)
             .fetch_one(&self.db)
-            .await;
-
-        super::map_result(result)
+            .await
+            .map_err(super::get_errors)
     }
 
-    async fn update(&self, input: Self::Model) -> crate::shared::Result<()> {
-        let result =
-            sqlx::query("UPDATE chats SET name = ?, enable_push = ?, title = ? WHERE chat_id = ?;")
-                .bind(input.name)
-                .bind(input.enable_push)
-                .bind(input.title)
-                .bind(input.chat_id)
-                .execute(&self.db)
-                .await;
+    async fn update(&self, input: Chat) -> Result<(), UpdateChatError> {
+        let _ = sqlx::query(
+            "UPDATE chats SET name = $1, enable_push = $2, title = $3 WHERE chat_id = $4;",
+        )
+        .bind(input.name)
+        .bind(input.enable_push)
+        .bind(input.title)
+        .bind(input.chat_id)
+        .execute(&self.db)
+        .await
+        .map_err(super::update_errors)?;
 
-        super::map_result(result.map(|_| ()))
+        Ok(())
     }
-}
 
-impl IChatRepository for ChatRepository {
-    async fn get_list_for_push(&self) -> Result<Vec<Chat>> {
-        let result = sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
+    async fn get_list_for_push(&self) -> Result<Vec<Chat>, GetChatError> {
+        sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)
-            .await;
-
-        super::map_result(result)
+            .await
+            .map_err(super::get_errors)
     }
 }
