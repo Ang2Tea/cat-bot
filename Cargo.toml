@@ -2,22 +2,24 @@
 name = "cat-bot"
 version = "0.1.0"
 edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
 
 [features]
-default = ["postgres", "sqlite"]
-postgres = ["sqlx/postgres"]
-sqlite = ["sqlx/sqlite"]
+default = ["in-memory", "postgres", "sqlite"]
+in-memory = []
+sqlx = ["dep:sqlx"]
+postgres = ["sqlx", "sqlx/postgres"]
+sqlite = ["sqlx", "sqlx/sqlite"]
 
 [dependencies]
-tokio = { version = "1.44", features = ["full"] }
-thiserror = "2"
 futures = "0.3"
+tokio = { version = "1.44", features = ["full"] }
 log = "0.4"
-dotenvy = "0.15"
 env_logger = "0.11"
-uuid = { version = "1.0", features = ["serde", "v4"] }
+thiserror = "2"
+dotenvy = "0.15"
 serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12", features = ["json", "blocking"] }
 teloxide = { version = "0.14.1", features = ["macros"] }
-sqlx = { version = "0.8", features = ["runtime-tokio"] }
-rand = "0.9.0"
+sqlx = { version = "0.8", optional = true, features = ["runtime-tokio"] }

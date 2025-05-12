@@ -1,8 +1,14 @@
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+    time::{Duration, SystemTime, UNIX_EPOCH},
+    u64,
+};
 
-use rand::Rng;
-
-use crate::{contracts::{GetPictures, PictureDto, PictureType}, shared::GetPictureError};
+use crate::{
+    contracts::{GetPictures, PictureDto, PictureType},
+    shared::GetPictureError,
+};
 
 use super::get_picture_enum::GetPictureEnum;
 
@@ -17,9 +23,16 @@ impl CompositeApi {
     }
 
     fn get_random_picture_type(&self) -> PictureType {
-        let mut rng = rand::rng();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or(Duration::from_secs(1))
+            .as_secs();
 
-        match rng.random_range(0..2) {
+        // Перевести в минуты
+        let total_minutes = now / 60;
+        let count = u64::try_from(self.apis.iter().count()).unwrap_or(u64::MAX);
+
+        match total_minutes % count {
             0 => PictureType::Cat,
             1 => PictureType::Dog,
             _ => PictureType::Dog,

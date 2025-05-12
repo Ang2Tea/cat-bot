@@ -2,7 +2,7 @@ use cat_bot::{
     adapters::{
         bot,
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::postgres as db,
+        repositories::in_memory as db,
     },
     configs,
     contracts::PictureType,

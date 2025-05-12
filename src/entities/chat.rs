@@ -1,4 +1,5 @@
-#[derive(Debug, sqlx::FromRow)]
+#[derive(Debug, Clone)]
+#[cfg_attr(feature = "sqlx", derive(sqlx::FromRow))]
 pub struct Chat {
     pub chat_id: i64,
     pub name: Option<String>,

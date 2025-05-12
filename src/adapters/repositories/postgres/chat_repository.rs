@@ -1,5 +1,5 @@
 use crate::{
-    adapters::repositories,
+    adapters::repositories::sqlx_helper,
     entities::{chat::Chat, repositories::ChatRepository as IChatRepository},
     shared::{CreateChatError, GetChatError, UpdateChatError},
 };
@@ -18,14 +18,13 @@ impl ChatRepository {
 
 impl IChatRepository for ChatRepository {
     async fn create(&self, input: Chat) -> Result<(), CreateChatError> {
-        let t = sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES ($1, $2, $3);")
+        sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES ($1, $2, $3);")
             .bind(input.chat_id)
             .bind(input.name)
             .bind(input.title)
             .execute(&self.db)
-            .await;
-
-        let _ = t.map_err(repositories::create_errors)?;
+            .await
+            .map_err(sqlx_helper::create_errors)?;
 
         Ok(())
     }
@@ -34,7 +33,7 @@ impl IChatRepository for ChatRepository {
         sqlx::query_as::<_, Chat>("SELECT * FROM chats;")
             .fetch_all(&self.db)
             .await
-            .map_err(repositories::get_errors)
+            .map_err(sqlx_helper::get_errors)
     }
 
     async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
@@ -42,7 +41,7 @@ impl IChatRepository for ChatRepository {
             .bind(id)
             .fetch_one(&self.db)
             .await
-            .map_err(repositories::get_errors)
+            .map_err(sqlx_helper::get_errors)
     }
 
     async fn update(&self, input: Chat) -> Result<(), UpdateChatError> {
@@ -55,7 +54,7 @@ impl IChatRepository for ChatRepository {
         .bind(input.chat_id)
         .execute(&self.db)
         .await
-        .map_err(repositories::update_errors)?;
+        .map_err(sqlx_helper::update_errors)?;
 
         Ok(())
     }
@@ -64,6 +63,6 @@ impl IChatRepository for ChatRepository {
         sqlx::query_as::<_, Chat>("SELECT * FROM chats WHERE enable_push;")
             .fetch_all(&self.db)
             .await
-            .map_err(repositories::get_errors)
+            .map_err(sqlx_helper::get_errors)
     }
 }
