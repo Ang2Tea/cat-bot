@@ -1,7 +1,23 @@
-pub type Result<T> = std::result::Result<T, ErrorKind>;
+use std::fmt::Display;
 
-#[derive(Debug)]
-pub enum ErrorKind {
-    NotFound,
-    Other(String),
+use thiserror::Error;
+
+#[derive(Debug, Display, Error)]
+pub enum CreateChatError {
+
+}
+
+#[derive(Debug, Display, Error)]
+pub enum GetChatError {
+
+}
+
+#[derive(Debug, Display, Error)]
+pub enum UpdateChatError {
+
+}
+
+#[derive(Debug, Display, Error)]
+pub enum GetPictureError {
+
 }

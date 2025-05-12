@@ -214,6 +214,7 @@ dependencies = [
  "serde",
  "sqlx",
  "teloxide",
+ "thiserror",
  "tokio",
  "uuid",
 ]

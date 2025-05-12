@@ -1,6 +1,5 @@
 use std::path::Path;
 
-use crate::shared::{self, ErrorKind};
 use sqlx::{
     Database, Pool,
     migrate::{Migrate, MigrateDatabase, Migrator},
@@ -36,15 +35,5 @@ where
     match migration_results {
         Ok(_) => Ok(db),
         Err(error) => Err(error.to_string()),
-    }
-}
-
-fn map_result<T>(result: sqlx::Result<T>) -> shared::Result<T> {
-    match result {
-        Ok(r) => Ok(r),
-        Err(err) => match err {
-            sqlx::Error::RowNotFound => Result::Err(ErrorKind::NotFound),
-            _ => Result::Err(ErrorKind::Other(err.to_string())),
-        },
     }
 }
