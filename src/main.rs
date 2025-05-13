@@ -2,13 +2,12 @@ use cat_bot::{
     adapters::{
         bot,
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::sqlite_chat_repository::SqlLiteChatRepository,
+        repositories::in_memory as db,
     },
     configs,
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
-use sqlx::Sqlite;
 use std::{collections::HashMap, sync::Arc};
 
 #[tokio::main]
@@ -20,11 +19,9 @@ async fn main() {
 
     let config = configs::init_config();
 
-    let db = cat_bot::adapters::repositories::init_db::<Sqlite>(&config.db_url)
-        .await
-        .unwrap();
+    let db = db::init_db(&config.db_url).await.unwrap();
 
-    let chat_repository = Arc::new(SqlLiteChatRepository::new(db));
+    let chat_repository = Arc::new(db::ChatRepository::new(db));
 
     let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
     let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));

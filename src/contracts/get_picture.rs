@@ -1,18 +1,11 @@
-use crate::shared::Result;
+use crate::shared::GetPictureError;
+
 use super::models::{PictureDto, PictureType};
 
-pub trait AsyncGetPictures {
+pub trait GetPictures: Clone + Send + Sync + 'static {
     fn get_pictures(
         &self,
         picture_type: Option<PictureType>,
         limit: Option<u32>,
-    ) -> impl std::future::Future<Output = Result<Vec<PictureDto>>> + Send;
-}
-
-pub trait GetPictures {
-    fn get_pictures(
-        &self,
-        picture_type: Option<PictureType>,
-        limit: Option<u32>,
-    ) -> Result<Vec<PictureDto>>;
+    ) -> impl std::future::Future<Output = Result<Vec<PictureDto>, GetPictureError>> + Send;
 }
