@@ -1,6 +1,6 @@
 # Cat Bot
-[![en](https://img.shields.io/badge/lang-en-red.svg)](https://github.com/Ang2Tea/cat-bot/README.md)
-[![ru](https://img.shields.io/badge/lang-ru-green.svg)](https://github.com/Ang2Tea/cat-bot/README.ru.md)
+[![en](https://img.shields.io/badge/lang-en-red.svg)](./README.md)
+[![ru](https://img.shields.io/badge/lang-ru-green.svg)](./README.ru.md)
 
 A Telegram bot written in Rust that sends cat and dog pictures on demand or periodically. Built with Teloxide, TheCatAPI, and TheDogAPI. Supports SQLite and PostgreSQL, and can be deployed via Docker.
 
