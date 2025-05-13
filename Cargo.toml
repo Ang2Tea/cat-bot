@@ -6,7 +6,7 @@ repository = "https://github.com/Ang2Tea/cat-bot"
 readme = "README.md"
 
 [features]
-default = ["in-memory", "postgres", "sqlite"]
+default = ["in-memory"]
 in-memory = []
 sqlx = ["dep:sqlx"]
 postgres = ["sqlx", "sqlx/postgres"]
