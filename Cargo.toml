@@ -12,14 +12,30 @@ sqlx = ["dep:sqlx"]
 postgres = ["sqlx", "sqlx/postgres"]
 sqlite = ["sqlx", "sqlx/sqlite"]
 
+
+[[bin]]
+name = "cat-bot"
+path = "src/bin/shuttle/main.rs"
+required-features = ["postgres"]
+
+[[bin]]
+name = "standalone"
+path = "src/bin/standalone.rs"
+
+
 [dependencies]
 futures = "0.3"
-tokio = { version = "1.44", features = ["full"] }
-log = "0.4"
-env_logger = "0.11"
+tokio = { version = "1.45.1", features = ["full"] }
+
+# Logging
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+
 thiserror = "2"
 dotenvy = "0.15"
 serde = { version = "1.0", features = ["derive"] }
-reqwest = { version = "0.12", features = ["json", "blocking"] }
-teloxide = { version = "0.14.1", features = ["macros"] }
-sqlx = { version = "0.8", optional = true, features = ["runtime-tokio"] }
+reqwest = { version = "0.12.19", features = ["json", "blocking"] }
+teloxide = { version = "0.15.0", features = ["macros"] }
+sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
+shuttle-runtime = { version = "0.55.0", features = ["tracing-subscriber"] }
+shuttle-shared-db = { version = "0.55.0", features = ["postgres", "sqlx"] }
