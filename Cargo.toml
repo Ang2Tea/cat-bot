@@ -7,6 +7,7 @@ readme = "README.md"
 
 [features]
 default = ["in-memory"]
+shuttle = ["in-memory", "postgres"]
 in-memory = []
 sqlx = ["dep:sqlx"]
 postgres = ["sqlx", "sqlx/postgres"]
@@ -24,6 +25,7 @@ path = "src/bin/standalone.rs"
 
 
 [dependencies]
+# Async
 futures = "0.3"
 tokio = { version = "1.45.1", features = ["full"] }
 
@@ -31,11 +33,20 @@ tokio = { version = "1.45.1", features = ["full"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
 
-thiserror = "2"
-dotenvy = "0.15"
+# Telegram API
+teloxide = { version = "0.15.0", features = ["macros"] }
+
+# HTTP Client
 serde = { version = "1.0", features = ["derive"] }
 reqwest = { version = "0.12.19", features = ["json", "blocking"] }
-teloxide = { version = "0.15.0", features = ["macros"] }
+
+# Databases
 sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
+
+# Utils
+thiserror = "2"
+dotenvy = "0.15"
+
+# Shuttle
 shuttle-runtime = { version = "0.55.0", features = ["tracing-subscriber"] }
 shuttle-shared-db = { version = "0.55.0", features = ["postgres", "sqlx"] }
