@@ -8,4 +8,4 @@ pub mod postgres;
 pub mod sqlite;
 
 #[cfg(feature = "sqlx")]
-mod sqlx_helper;
+pub mod sqlx_helper;
