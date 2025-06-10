@@ -6,7 +6,7 @@ use std::{collections::HashMap, sync::Arc};
 use cat_bot::{
     adapters::{
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::{postgres as db, sqlx_helper},
+        repositories::postgres as db,
     },
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
@@ -30,7 +30,10 @@ async fn main(
 
     let config = config_util::to_config(secrets.clone());
 
-    sqlx_helper::migrate(&pool, Some("./migrations/postgres")).await.unwrap();
+    sqlx::migrate!()
+        .run(&pool)
+        .await
+        .unwrap();
 
     let chat_repository = Arc::new(db::ChatRepository::new(pool));
 
