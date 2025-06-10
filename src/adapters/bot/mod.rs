@@ -25,7 +25,7 @@ pub async fn run<P, CC, UC>(
     CC: ChatCreateUC,
     UC: ChatUpdateUC,
 {
-    let bot = Bot::from_env();
+    let bot = Bot::new(config.bot_token);
 
     let write_future = write_image(bot.clone(), config.delay_in_sec, picture_uc.clone());
     tokio::spawn(write_future);
@@ -42,15 +42,15 @@ pub async fn write_image<P>(bot: Bot, delay_in_sec: u64, picture_helper: Arc<P>)
 where
     P: PictureGetUC,
 {
-    log::debug!("Starting image writer");
+    tracing::debug!("Starting image writer");
 
     loop {
         sleep(Duration::from_secs(delay_in_sec)).await;
-        log::debug!("Writing image");
+        tracing::debug!("Writing image");
 
         let chats = picture_helper.get_picture_for_notification().await;
         if chats.is_err() {
-            log::warn!("Failed to get chats");
+            tracing::warn!("Failed to get chats");
             continue;
         }
 

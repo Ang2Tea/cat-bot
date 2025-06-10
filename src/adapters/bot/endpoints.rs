@@ -17,7 +17,7 @@ type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 pub async fn send_photo(bot: &Bot, chat_id: i64, url: &str) -> HandlerResult {
     let url = Url::parse(url);
     if let Err(err) = url {
-        log::error!("Failed to parse url: {}", err);
+        tracing::error!("Failed to parse url: {}", err);
         return Ok(());
     }
 
@@ -41,7 +41,7 @@ where
     match raw_cats {
         Ok(cats) => send_photo(&bot, msg.chat.id.0, &cats).await.map(|_| ()),
         Err(err) => {
-            log::error!("{}", err);
+            tracing::error!("{}", err);
 
             bot.send_message(msg.chat.id, "Что то пошло не так").await?;
             Ok(())
@@ -66,7 +66,7 @@ where
     let result = chat_helper.create(dto).await;
 
     if let Err(err) = result {
-        log::error!("{}", err);
+        tracing::error!("{}", err);
         return Ok(());
     }
 
@@ -95,7 +95,7 @@ where
     let result = chat_helper.change_push(msg.chat.id.0).await;
 
     if let Err(err) = result {
-        log::error!("{}", err);
+        tracing::error!("{}", err);
         return Ok(());
     }
 

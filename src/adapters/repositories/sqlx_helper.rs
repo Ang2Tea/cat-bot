@@ -6,7 +6,7 @@ use std::path::Path;
 
 use crate::shared::{CreateChatError, GetChatError, UpdateChatError};
 
-pub async fn inner_init_db<DB>(db_urn: &str, migration_path: Option<&str>) -> Result<Pool<DB>, String>
+pub async fn init_db<DB>(db_urn: &str) -> std::result::Result<Pool<DB>, String>
 where
     DB: Database + MigrateDatabase,
     <DB as sqlx::Database>::Connection: Migrate,
@@ -19,16 +19,24 @@ where
 
     let db = Pool::<DB>::connect(db_urn).await.unwrap();
 
+    Ok(db)
+}
+
+pub async fn migrate<DB>(db: &Pool<DB>, migration_path: Option<&str>) -> Result<(), String>
+where
+    DB: Database + MigrateDatabase,
+    <DB as sqlx::Database>::Connection: Migrate,
+{
     let migration_path = migration_path.unwrap_or("./migrations");
 
     let migration_results = Migrator::new(Path::new(migration_path))
         .await
         .map_err(|e| e.to_string())?
-        .run(&db)
+        .run(db)
         .await;
 
     match migration_results {
-        Ok(_) => Ok(db),
+        Ok(_) => Ok(()),
         Err(error) => Err(error.to_string()),
     }
 }

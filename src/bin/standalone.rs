@@ -9,13 +9,18 @@ use cat_bot::{
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
 use std::{collections::HashMap, sync::Arc};
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
 async fn main() {
     let _ = dotenvy::from_path(".env");
 
-    env_logger::init();
-    log::debug!("Starting command bot...");
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(EnvFilter::from_default_env())
+        .init();
+
+    tracing::debug!("Starting command bot...");
 
     let config = configs::init_config();
 
