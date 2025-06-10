@@ -9,8 +9,7 @@ readme = "README.md"
 default = []
 shuttle = ["postgres"]
 sqlx = ["dep:sqlx"]
-postgres = ["sqlx", "sqlx/postgres"]
-sqlite = ["sqlx", "sqlx/sqlite"]
+postgres = ["sqlx", "sqlx/postgres"] 
 
 
 [[bin]]
