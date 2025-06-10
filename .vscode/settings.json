@@ -1,6 +1,5 @@
 {
     "rust-analyzer.cargo.features": [
-        "in-memory",
         "sqlx",
         "postgres",
         "sqlite",
