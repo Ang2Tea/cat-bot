@@ -45,7 +45,6 @@ where
     tracing::debug!("Starting image writer");
 
     loop {
-        sleep(Duration::from_secs(delay_in_sec)).await;
         tracing::debug!("Writing image");
 
         let chats = picture_helper.get_picture_for_notification().await;
@@ -57,5 +56,7 @@ where
         for (url, chat) in chats.unwrap() {
             let _ = send_photo(&bot, chat.chat_id, &url).await;
         }
+
+        sleep(Duration::from_secs(delay_in_sec)).await;
     }
 }
