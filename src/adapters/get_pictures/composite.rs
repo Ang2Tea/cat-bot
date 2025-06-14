@@ -2,7 +2,6 @@ use std::{
     collections::HashMap,
     sync::Arc,
     time::{Duration, SystemTime, UNIX_EPOCH},
-    u64,
 };
 
 use crate::{
@@ -28,14 +27,20 @@ impl CompositeApi {
             .unwrap_or(Duration::from_secs(1))
             .as_secs();
 
-        // Перевести в минуты
-        let total_minutes = now / 60;
-        let count = u64::try_from(self.apis.iter().count()).unwrap_or(u64::MAX);
+        // Перевод в часы
+        let total_hours = now / 3600;
 
-        match total_minutes % count {
+        // Проверка на пустой список API
+        let count = self.apis.iter().count();
+        if count == 0 {
+            return PictureType::Cat;
+        }
+
+        // Предполагаем, что у нас только два типа картинок
+        match total_hours % 2 {
             0 => PictureType::Cat,
             1 => PictureType::Dog,
-            _ => PictureType::Dog,
+            _ => unreachable!(),
         }
     }
 }
