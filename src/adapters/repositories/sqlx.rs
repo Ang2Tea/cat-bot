@@ -1,3 +1,6 @@
+#[cfg(feature = "postgres")]
+pub mod postgres_chat_repository;
+
 use sqlx::{
     Database, Error, Pool,
     migrate::{Migrate, MigrateDatabase, Migrator},

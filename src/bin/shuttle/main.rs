@@ -6,7 +6,7 @@ use std::{collections::HashMap, sync::Arc};
 use cat_bot::{
     adapters::{
         get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::postgres as db,
+        repositories::sqlx::postgres_chat_repository::PostgresChatRepository,
     },
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
@@ -16,9 +16,9 @@ use sqlx::PgPool;
 use crate::bot_service::BotService;
 
 type BotShuttleService = BotService<
-    PictureUC<CompositeApi, db::ChatRepository>,
-    ChatUC<db::ChatRepository>,
-    ChatUC<db::ChatRepository>,
+    PictureUC<CompositeApi, PostgresChatRepository>,
+    ChatUC<PostgresChatRepository>,
+    ChatUC<PostgresChatRepository>,
 >;
 
 #[shuttle_runtime::main]
@@ -30,12 +30,9 @@ async fn main(
 
     let config = config_util::to_config(secrets.clone());
 
-    sqlx::migrate!()
-        .run(&pool)
-        .await
-        .unwrap();
+    sqlx::migrate!().run(&pool).await.unwrap();
 
-    let chat_repository = Arc::new(db::ChatRepository::new(pool));
+    let chat_repository = Arc::new(PostgresChatRepository::new(pool));
 
     let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
     let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));

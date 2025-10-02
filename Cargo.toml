@@ -7,15 +7,15 @@ readme = "README.md"
 
 [features]
 default = []
-shuttle = ["postgres"]
 sqlx = ["dep:sqlx"]
-postgres = ["sqlx", "sqlx/postgres"] 
+diesel=["dep:diesel", "dep:diesel-async"]
+postgres = ["diesel-async/postgres", "sqlx/postgres"] 
 
 
 [[bin]]
 name = "cat-bot"
 path = "src/bin/shuttle/main.rs"
-required-features = ["postgres"]
+required-features = ["sqlx", "postgres"]
 
 [[bin]]
 name = "standalone"
@@ -40,6 +40,8 @@ reqwest = { version = "0.12.19", features = ["json", "blocking"] }
 
 # Databases
 sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
+diesel = { version = "2.2.12", optional = true }
+diesel-async = { version = "0.6.1", optional = true }
 
 # Utils
 thiserror = "2.0.17"
@@ -47,5 +49,4 @@ dotenvy = "0.15.7"
 
 # Shuttle
 shuttle-runtime = { version = "0.57.0", features = ["tracing-subscriber"] }
-shuttle-shared-db = { version = "0.57.0", features = ["postgres", "sqlx"] }
-
+shuttle-shared-db = { version = "0.57.0", features = ["postgres", "sqlx", "diesel-async"] }

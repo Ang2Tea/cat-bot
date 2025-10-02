@@ -1,22 +1,22 @@
 use crate::{
-    adapters::repositories::sqlx_helper,
-    entities::{chat::Chat, repositories::ChatRepository as IChatRepository},
+    adapters::repositories::sqlx as sqlx_helper,
+    entities::{chat::Chat, repositories::ChatRepository},
     shared::{CreateChatError, GetChatError, UpdateChatError},
 };
 use sqlx::{Pool, Postgres};
 
 #[derive(Debug, Clone)]
-pub struct ChatRepository {
+pub struct PostgresChatRepository {
     pub db: Pool<Postgres>,
 }
 
-impl ChatRepository {
+impl PostgresChatRepository {
     pub fn new(db: Pool<Postgres>) -> Self {
         Self { db }
     }
 }
 
-impl IChatRepository for ChatRepository {
+impl ChatRepository for PostgresChatRepository {
     async fn create(&self, input: Chat) -> Result<(), CreateChatError> {
         sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES ($1, $2, $3);")
             .bind(input.chat_id)
