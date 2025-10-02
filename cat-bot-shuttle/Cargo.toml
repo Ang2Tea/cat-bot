@@ -1,0 +1,16 @@
+[package]
+name = "cat-bot-shuttle"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
+
+[dependencies]
+cat-bot={path = "../cat-bot"}
+
+tracing = { workspace = true }
+
+sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
+
+shuttle-runtime = { version = "0.57.0", features = ["tracing-subscriber"] }
+shuttle-shared-db = { version = "0.57.0", features = ["postgres", "sqlx"] }

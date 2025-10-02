@@ -168,15 +168,33 @@ version = "0.1.0"
 dependencies = [
  "diesel",
  "diesel-async",
- "dotenvy",
  "futures",
  "reqwest",
  "serde",
- "shuttle-runtime",
- "shuttle-shared-db",
  "sqlx",
  "teloxide",
  "thiserror 2.0.17",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "cat-bot-shuttle"
+version = "0.1.0"
+dependencies = [
+ "cat-bot",
+ "shuttle-runtime",
+ "shuttle-shared-db",
+ "sqlx",
+ "tracing",
+]
+
+[[package]]
+name = "cat-bot-standalone"
+version = "0.1.0"
+dependencies = [
+ "cat-bot",
+ "dotenvy",
  "tokio",
  "tracing",
  "tracing-subscriber",
