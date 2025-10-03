@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-use crate::{
-    contracts::{ChangeChatDto, ChatCreateUC, ChatDto, ChatGetUC, ChatUpdateUC},
-    entities::{chat::Chat, repositories::ChatRepository},
-    shared::{CreateChatError, GetChatError, UpdateChatError},
-};
+use cat_bot_entities::{chat::Chat, repositories::ChatRepository, shared::{CreateChatError, GetChatError, UpdateChatError}};
+
+use crate::contracts::{ChangeChatDto, ChatCreateUC, ChatDto, ChatGetUC, ChatUpdateUC};
 
 #[derive(Debug, Clone)]
 pub struct ChatUC<R>

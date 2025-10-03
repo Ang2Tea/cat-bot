@@ -1,10 +1,9 @@
 use std::sync::Arc;
 
-use cat_bot::{
-    adapters::bot,
-    configs::Config,
-    contracts::{ChatCreateUC, ChatUpdateUC, PictureGetUC},
-};
+use cat_bot::contracts::{ChatCreateUC, ChatUpdateUC, PictureGetUC};
+use cat_bot_adapters;
+
+use crate::config_util::Config;
 
 pub struct BotService<P, CC, UC>
 where
@@ -26,8 +25,9 @@ where
     UC: ChatUpdateUC,
 {
     async fn bind(self, _: std::net::SocketAddr) -> Result<(), shuttle_runtime::Error> {
-        bot::run(
-            self.config,
+        cat_bot_adapters::run(
+            self.config.bot_token,
+            self.config.delay_in_sec,
             self.picture_uc,
             self.create_chat_uc,
             self.update_chat_uc,

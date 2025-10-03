@@ -1,7 +1,10 @@
 [workspace]
 resolver = "3"
 members = [
+    "cat-bot-entities",
     "cat-bot",
+    "cat-bot-databases",
+    "cat-bot-adapters",
     "cat-bot-standalone",
     "cat-bot-shuttle"
 ]
@@ -10,3 +13,5 @@ members = [
 tracing = "0.1.41"
 
 tokio = { version = "1.45.1", features = ["full"] }
+
+thiserror = "2.0.17"

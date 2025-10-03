@@ -1,15 +1,17 @@
+mod configs;
+
+use std::{collections::HashMap, sync::Arc};
+
+use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+
 use cat_bot::{
-    adapters::{
-        bot,
-        get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::in_memory as db,
-    },
-    configs,
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
-use std::{collections::HashMap, sync::Arc};
-use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
+use cat_bot_adapters::get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi};
+use cat_bot_databases::in_memory;
+
+use crate::configs::Config;
 
 #[tokio::main]
 async fn main() {
@@ -22,11 +24,11 @@ async fn main() {
 
     tracing::debug!("Starting command bot...");
 
-    let config = configs::init_config();
+    let config = Config::init();
 
-    let db = db::init_db(&config.db_url).await.unwrap();
+    let db = in_memory::init_db().await.unwrap();
 
-    let chat_repository = Arc::new(db::ChatRepository::new(db));
+    let chat_repository = Arc::new(in_memory::InMemoryChatRepository::new(db));
 
     let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
     let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));
@@ -40,5 +42,12 @@ async fn main() {
     let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
     let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
 
-    bot::run(config, picture_uc, chat_uc.clone(), chat_uc.clone()).await
+    cat_bot_adapters::run(
+        config.bot_token,
+        config.delay_in_sec,
+        picture_uc,
+        chat_uc.clone(),
+        chat_uc.clone(),
+    )
+    .await
 }

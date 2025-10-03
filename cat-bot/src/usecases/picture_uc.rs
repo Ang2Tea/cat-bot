@@ -1,10 +1,8 @@
 use std::sync::Arc;
 
-use crate::{
-    contracts::{ChatDto, GetPictures, PictureGetUC, PictureType},
-    entities::repositories::ChatRepository,
-    shared::GetPictureError,
-};
+use cat_bot_entities::repositories::ChatRepository;
+
+use crate::contracts::{ChatDto, GetPictureError, GetPictures, PictureGetUC, PictureType};
 
 #[derive(Debug, Clone)]
 pub struct PictureUC<A, R>
@@ -48,7 +46,9 @@ where
         Ok(first.url.clone())
     }
 
-    async fn get_picture_for_notification(&self) -> Result<Vec<(String, ChatDto)>, GetPictureError> {
+    async fn get_picture_for_notification(
+        &self,
+    ) -> Result<Vec<(String, ChatDto)>, GetPictureError> {
         let chats = self.chat_repository.get_list_for_push().await?;
 
         let pictures = self

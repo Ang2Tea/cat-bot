@@ -1,4 +1,4 @@
-use crate::shared::{CreateChatError, GetChatError, UpdateChatError};
+use cat_bot_entities::shared::{CreateChatError, GetChatError, UpdateChatError};
 
 use super::models::{ChangeChatDto, ChatDto};
 

@@ -21,7 +21,6 @@ target/
 
 # Project files
 **/.env
-**/sqlite.db*
 **/data
 .shuttle*
 Secrets*.toml

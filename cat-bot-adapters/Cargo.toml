@@ -1,0 +1,19 @@
+[package]
+name = "cat-bot-adapters"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
+
+[dependencies]
+tracing = { workspace = true }
+tokio = { workspace = true }
+
+# Telegram API
+teloxide = { version = "0.17.0", features = ["macros"] }
+
+# HTTP Client
+serde = { version = "1.0.228", features = ["derive"] }
+reqwest = { version = "0.12.19", features = ["json", "blocking"] }
+
+cat-bot = {path = "../cat-bot"}

@@ -1,7 +1,7 @@
 {
     "rust-analyzer.cargo.features": [
-        "sqlx",
-        "postgres",
-        "diesel"
+        // "sqlx",
+        // "postgres",
+        // "diesel"
     ]
 }

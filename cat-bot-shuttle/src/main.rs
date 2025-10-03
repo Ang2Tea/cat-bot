@@ -1,19 +1,17 @@
 mod bot_service;
 mod config_util;
 
+use sqlx::PgPool;
 use std::{collections::HashMap, sync::Arc};
 
 use cat_bot::{
-    adapters::{
-        get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi},
-        repositories::sqlx::postgres_chat_repository::PostgresChatRepository,
-    },
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
-use sqlx::PgPool;
+use cat_bot_databases::{self, sqlx_repo::postgres_chat_repository::PostgresChatRepository};
+use cat_bot_adapters::get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi};
 
-use crate::bot_service::BotService;
+use crate::{bot_service::BotService, config_util::Config};
 
 type BotShuttleService = BotService<
     PictureUC<CompositeApi, PostgresChatRepository>,
@@ -28,9 +26,11 @@ async fn main(
 ) -> Result<BotShuttleService, shuttle_runtime::Error> {
     tracing::debug!("Starting command bot...");
 
-    let config = config_util::to_config(secrets.clone());
+    let config = Config::from(secrets.clone());
 
-    sqlx::migrate!().run(&pool).await.unwrap();
+    cat_bot_databases::sqlx_repo::migrate(&pool, Some("../migrations"))
+        .await
+        .map_err(|e| shuttle_runtime::Error::Database(e))?;
 
     let chat_repository = Arc::new(PostgresChatRepository::new(pool));
 

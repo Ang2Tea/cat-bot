@@ -1,4 +1,4 @@
-use crate::shared::GetPictureError;
+use super::errors::GetPictureError;
 
 use super::models::{ChatDto, PictureType};
 

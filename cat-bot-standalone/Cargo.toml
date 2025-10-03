@@ -6,11 +6,13 @@ repository = "https://github.com/Ang2Tea/cat-bot"
 readme = "README.md"
 
 [dependencies]
-cat-bot={path = "../cat-bot"}
-
 tokio = { workspace = true }
 
 dotenvy = "0.15.7"
 
 tracing = { workspace = true }
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+
+cat-bot = { path="../cat-bot" }
+cat-bot-databases = { path = "../cat-bot-databases", features = ["sqlx", "postgres", "diesel"]}
+cat-bot-adapters = { path="../cat-bot-adapters" }

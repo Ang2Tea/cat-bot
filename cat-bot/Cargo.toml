@@ -5,29 +5,8 @@ edition = "2024"
 repository = "https://github.com/Ang2Tea/cat-bot"
 readme = "README.md"
 
-[features]
-default = []
-sqlx = ["dep:sqlx"]
-diesel=["dep:diesel", "dep:diesel-async"]
-postgres = ["diesel-async/postgres", "sqlx/postgres"] 
-
 [dependencies]
 tracing = { workspace = true }
-# Async
-futures = "0.3.31"
-tokio = { workspace = true }
-
-# Telegram API
-teloxide = { version = "0.17.0", features = ["macros"] }
-
-# HTTP Client
+thiserror ={ workspace = true }
 serde = { version = "1.0.228", features = ["derive"] }
-reqwest = { version = "0.12.19", features = ["json", "blocking"] }
-
-# Databases
-sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
-diesel = { version = "2.2.12", optional = true }
-diesel-async = { version = "0.6.1", optional = true }
-
-# Utils
-thiserror = "2.0.17"
+cat-bot-entities ={ path = "../cat-bot-entities" }
