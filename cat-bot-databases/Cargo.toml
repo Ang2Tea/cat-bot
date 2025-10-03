@@ -8,7 +8,7 @@ readme = "README.md"
 [features]
 default = []
 sqlx = ["dep:sqlx"]
-diesel = ["dep:diesel", "dep:diesel-async", "diesel-async/bb8"]
+diesel = ["dep:diesel", "dep:diesel-async", "diesel-async/deadpool"]
 postgres = ["diesel-async/postgres", "sqlx/postgres"]
 
 [dependencies]

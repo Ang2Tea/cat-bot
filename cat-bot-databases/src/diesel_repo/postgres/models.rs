@@ -1,3 +1,4 @@
+use cat_bot_entities::chat;
 use diesel::prelude::*;
 
 #[derive(Queryable, Selectable)]
@@ -8,4 +9,15 @@ pub struct Chat {
     pub name: Option<String>,
     pub title: Option<String>,
     pub enable_push: bool,
+}
+
+impl From<Chat> for chat::Chat {
+    fn from(value: Chat) -> Self {
+        Self {
+            chat_id: value.chat_id,
+            name: value.name,
+            title: value.title,
+            enable_push: value.enable_push,
+        }
+    }
 }
