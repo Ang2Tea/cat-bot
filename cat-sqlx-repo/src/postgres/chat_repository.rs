@@ -26,7 +26,7 @@ impl ChatRepository for PostgresRepository {
             .bind(input.chat_id)
             .bind(input.name)
             .bind(input.title)
-            .execute(&self.db)
+            .execute(&self.pool)
             .await
             .map_err(crate::create_errors)?;
 
@@ -34,8 +34,13 @@ impl ChatRepository for PostgresRepository {
     }
 
     async fn get_list(&self) -> Result<Vec<Chat>, GetChatError> {
+        let rows = sqlx::query_file!("sql-scripts/postgres/chat_select_all.sql")
+            .fetch_all(&self.pool)
+            .await
+            .map_err(crate::get_errors)?;
+
         let rows = sqlx::query("SELECT * FROM chats;")
-            .fetch_all(&self.db)
+            .fetch_all(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 
@@ -45,7 +50,7 @@ impl ChatRepository for PostgresRepository {
     async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
         let row = sqlx::query("SELECT * FROM chats WHERE chat_id = $1;")
             .bind(id)
-            .fetch_one(&self.db)
+            .fetch_one(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 
@@ -60,7 +65,7 @@ impl ChatRepository for PostgresRepository {
         .bind(input.enable_push)
         .bind(input.title)
         .bind(input.chat_id)
-        .execute(&self.db)
+        .execute(&self.pool)
         .await
         .map_err(crate::update_errors)?;
 
@@ -69,7 +74,7 @@ impl ChatRepository for PostgresRepository {
 
     async fn get_list_for_push(&self) -> Result<Vec<Chat>, GetChatError> {
         let rows = sqlx::query("SELECT * FROM chats WHERE enable_push;")
-            .fetch_all(&self.db)
+            .fetch_all(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 

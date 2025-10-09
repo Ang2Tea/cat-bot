@@ -1,15 +1,27 @@
 mod chat_repository;
 
-use sqlx::{Pool, Postgres};
+use sqlx::{PgPool};
+
+pub async fn migrate(db_url: &str) -> Result<(), String> {
+    let conn = PgPool::connect(db_url).await.map_err(|e|e.to_string())?;
+
+    sqlx::migrate!("migrations/postgres")
+        .run(&conn)
+        .await
+        .map_err(|e|e.to_string())?;
+
+    Ok(())
+}
 
 
 #[derive(Debug, Clone)]
 pub struct PostgresRepository {
-    db: Pool<Postgres>,
+    pool: PgPool,
 }
 
 impl PostgresRepository {
-    pub fn new(db: Pool<Postgres>) -> Self {
-        Self { db }
+    pub async  fn new(db_url: &str) -> Self {
+        let pool = PgPool::connect(db_url).await.unwrap();
+        Self { pool }
     }
 }
