@@ -1,31 +1,15 @@
+use std::vec;
+
 use cat_core::{
     entities::{chat::Chat, repositories::ChatRepository},
     shared::{CreateChatError, GetChatError, UpdateChatError},
 };
-use sqlx::{Row as _, postgres::PgRow};
 
 use crate::postgres::PostgresRepository;
 
-fn map_pg_row(r: PgRow) -> Option<Chat> {
-    let chat_id = r.try_get("chat_id").ok()?;
-    let name = r.try_get("name").ok()?;
-    let title = r.try_get("title").ok()?;
-    let enable_push = r.try_get("enable_push").ok()?;
-
-    Some(Chat {
-        chat_id,
-        name,
-        title,
-        enable_push,
-    })
-}
-
 impl ChatRepository for PostgresRepository {
     async fn create(&self, input: Chat) -> Result<(), CreateChatError> {
-        sqlx::query("INSERT INTO chats (chat_id, name, title) VALUES ($1, $2, $3);")
-            .bind(input.chat_id)
-            .bind(input.name)
-            .bind(input.title)
+        let _ = sqlx::query_file!("queries/postgres/chat_insert.sql", input.chat_id, input.name, input.title)
             .execute(&self.pool)
             .await
             .map_err(crate::create_errors)?;
@@ -34,37 +18,28 @@ impl ChatRepository for PostgresRepository {
     }
 
     async fn get_list(&self) -> Result<Vec<Chat>, GetChatError> {
-        let rows = sqlx::query_file!("sql-scripts/postgres/chat_select_all.sql")
+        let rows = sqlx::query_file!("queries/postgres/chat_select_all.sql")
             .fetch_all(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 
-        let rows = sqlx::query("SELECT * FROM chats;")
-            .fetch_all(&self.pool)
-            .await
-            .map_err(crate::get_errors)?;
-
-        Ok(rows.into_iter().filter_map(map_pg_row).collect())
+        // Ok(rows.into_iter().filter_map(map_pg_row).collect())
+        Ok(vec![])
     }
 
     async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
-        let row = sqlx::query("SELECT * FROM chats WHERE chat_id = $1;")
-            .bind(id)
+        let row = sqlx::query_file!("queries/postgres/chat_select_by_id.sql", id)
             .fetch_one(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 
-        map_pg_row(row).ok_or(GetChatError::NotFound)
+        Ok(Chat{chat_id: 0, name: None, title: None, enable_push: false})
+
+        // map_pg_row(row).ok_or(GetChatError::NotFound)
     }
 
     async fn update(&self, input: Chat) -> Result<(), UpdateChatError> {
-        let _ = sqlx::query(
-            "UPDATE chats SET name = $1, enable_push = $2, title = $3 WHERE chat_id = $4;",
-        )
-        .bind(input.name)
-        .bind(input.enable_push)
-        .bind(input.title)
-        .bind(input.chat_id)
+        let _ = sqlx::query_file!("queries/postgres/chat_update.sql", input.name, input.enable_push, input.title, input.chat_id)
         .execute(&self.pool)
         .await
         .map_err(crate::update_errors)?;
@@ -73,11 +48,12 @@ impl ChatRepository for PostgresRepository {
     }
 
     async fn get_list_for_push(&self) -> Result<Vec<Chat>, GetChatError> {
-        let rows = sqlx::query("SELECT * FROM chats WHERE enable_push;")
+        let rows = sqlx::query_file!("queries/postgres/chat_select_enable_push.sql")
             .fetch_all(&self.pool)
             .await
             .map_err(crate::get_errors)?;
 
-        Ok(rows.into_iter().filter_map(map_pg_row).collect())
+            Ok(vec![])
+        // Ok(rows.into_iter().filter_map(map_pg_row).collect())
     }
 }

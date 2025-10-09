@@ -1,7 +1,6 @@
 mod bot_service;
 mod config_util;
 
-use sqlx::PgPool;
 use std::{collections::HashMap, sync::Arc};
 
 use cat_core::{
@@ -21,18 +20,18 @@ type BotShuttleService = BotService<
 
 #[shuttle_runtime::main]
 async fn main(
-    #[shuttle_shared_db::Postgres] pool: PgPool,
+    #[shuttle_shared_db::Postgres] db_url: String,
     #[shuttle_runtime::Secrets] secrets: shuttle_runtime::SecretStore,
 ) -> Result<BotShuttleService, shuttle_runtime::Error> {
     tracing::debug!("Starting command bot...");
 
     let config = Config::from(secrets.clone());
 
-    cat_sqlx_repo::migrate(&pool, Some("../migrations"))
+    cat_sqlx_repo::postgres::migrate(&db_url)
         .await
         .map_err(|e| shuttle_runtime::Error::Database(e))?;
 
-    let chat_repository = Arc::new(PostgresRepository::new(pool));
+    let chat_repository = Arc::new(PostgresRepository::new(&db_url).await);
 
     let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
     let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));
