@@ -1,12 +1,11 @@
 [workspace]
 resolver = "3"
 members = [
-    "cat-bot-entities",
+    "cat-core",
+    "cat-adapters",
+    "cat-sqlx-repo",
+    "cat-diesel-repo",
     "cat-bot",
-    "cat-bot-databases",
-    "cat-bot-adapters",
-    "cat-bot-standalone",
-    "cat-bot-shuttle"
 ]
 
 [workspace.dependencies]

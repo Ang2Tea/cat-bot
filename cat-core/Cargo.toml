@@ -1,0 +1,11 @@
+[package]
+name = "cat-core"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
+
+[dependencies]
+tracing = { workspace = true }
+thiserror = { workspace = true }
+serde = { version = "1.0.228", features = ["derive"] }

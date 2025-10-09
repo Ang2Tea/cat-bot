@@ -1,2 +1,3 @@
-pub mod contracts;
-pub mod usecases;
+mod bot;
+
+pub use bot::run;

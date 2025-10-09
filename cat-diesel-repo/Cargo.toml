@@ -1,0 +1,19 @@
+[package]
+name = "cat-diesel-repo"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
+
+[features]
+default = []
+postgres = ["diesel-async/postgres", "diesel/postgres", "diesel_migrations/postgres"]
+
+[dependencies]
+tokio = { workspace = true }
+
+diesel = { version = "2.2.12" }
+diesel_migrations = { version = "2.2.0" }
+diesel-async = { version = "0.6.1", features = ["deadpool"] }
+
+cat-core = { path = "../cat-core" }
