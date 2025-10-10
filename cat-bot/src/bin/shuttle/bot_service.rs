@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use cat_core::contracts::{ChatCreateUC, ChatUpdateUC, PictureGetUC};
 
 use crate::config_util::Config;
@@ -11,9 +9,9 @@ where
     UC: ChatUpdateUC,
 {
     pub config: Config,
-    pub picture_uc: Arc<P>,
-    pub create_chat_uc: Arc<CC>,
-    pub update_chat_uc: Arc<UC>,
+    pub picture_uc: P,
+    pub create_chat_uc: CC,
+    pub update_chat_uc: UC,
 }
 
 #[shuttle_runtime::async_trait]

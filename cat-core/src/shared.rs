@@ -6,6 +6,8 @@ pub enum RepositoryError {
     NotFound,
     #[error("сan't create chat/s")]
     Duplicate,
+    #[error("сan't connect to database")]
+    Connection,
     #[error("{0}")]
     Other(String),
 }

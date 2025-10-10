@@ -3,12 +3,12 @@ mod config_util;
 
 use std::{collections::HashMap, sync::Arc};
 
+use cat_adapters::get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi};
 use cat_core::{
     contracts::PictureType,
     usecases::{chat_uc::ChatUC, picture_uc::PictureUC},
 };
 use cat_sqlx_repo::{self, postgres::PostgresRepository};
-use cat_adapters::get_pictures::{CompositeApi, GetPictureEnum, TheCatsApi, TheDogsApi};
 
 use crate::{bot_service::BotService, config_util::Config};
 
@@ -31,19 +31,31 @@ async fn main(
         .await
         .map_err(|e| shuttle_runtime::Error::Database(e))?;
 
-    let chat_repository = Arc::new(PostgresRepository::new(&db_url).await);
+    let chat_repository = PostgresRepository::try_new(&db_url)
+        .await
+        .map_err(|e| shuttle_runtime::Error::BuildPanic(e.to_string()))?;
 
-    let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
-    let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));
+    let the_cats_api = GetPictureEnum::Cat(
+        TheCatsApi::try_new(&config.api_key)
+            .map_err(|e| shuttle_runtime::Error::BuildPanic(e.to_string()))?,
+    );
+    let the_dogs_api = GetPictureEnum::Dog(
+        TheDogsApi::try_new(&config.api_key)
+            .map_err(|e| shuttle_runtime::Error::BuildPanic(e.to_string()))?,
+    );
 
-    let mut apis = HashMap::new();
-    apis.insert(PictureType::Cat, the_cats_api.clone());
-    apis.insert(PictureType::Dog, the_dogs_api.clone());
+    let apis = {
+        let mut apis = HashMap::new();
+        apis.insert(PictureType::Cat, the_cats_api.clone());
+        apis.insert(PictureType::Dog, the_dogs_api.clone());
 
-    let the_apis = Arc::new(CompositeApi::new(apis));
+        Arc::new(apis)
+    };
 
-    let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
-    let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
+    let the_apis = CompositeApi::new(apis);
+
+    let chat_uc = ChatUC::new(chat_repository.clone());
+    let picture_uc = PictureUC::new(the_apis.clone(), chat_repository.clone());
 
     Ok(BotService {
         config: config,

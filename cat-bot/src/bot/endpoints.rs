@@ -15,13 +15,15 @@ use super::commands::Command;
 type HandlerResult = Result<(), Box<dyn std::error::Error + Send + Sync>>;
 
 pub async fn send_photo(bot: &Bot, chat_id: i64, url: &str) -> HandlerResult {
-    let url = Url::parse(url);
-    if let Err(err) = url {
-        tracing::error!("Failed to parse url: {}", err);
-        return Ok(());
-    }
+    let url = match Url::parse(url) {
+        Ok(r) => r,
+        Err(err) => {
+            tracing::error!("Failed to parse url: {}", err);
+            return Ok(());
+        }
+    };
 
-    let input_file = InputFile::url(url.unwrap());
+    let input_file = InputFile::url(url);
 
     bot.send_photo(ChatId(chat_id), input_file).await?;
     Ok(())
@@ -94,12 +96,15 @@ where
 {
     let result = chat_helper.change_push(msg.chat.id.0).await;
 
-    if let Err(err) = result {
-        tracing::error!("{}", err);
-        return Ok(());
-    }
+    let change_status = match result {
+        Ok(r) => r,
+        Err(err) => {
+            tracing::error!("{}", err);
+            return Ok(());
+        }
+    };
 
-    let message = if result.unwrap() {
+    let message = if change_status {
         "Уведомления включены"
     } else {
         "Уведомления выключены"

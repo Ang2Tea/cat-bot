@@ -10,35 +10,39 @@ use super::get_picture_enum::GetPictureEnum;
 
 #[derive(Clone)]
 pub struct CompositeApi {
-    apis: HashMap<PictureType, Arc<GetPictureEnum>>,
+    apis: Arc<HashMap<PictureType, GetPictureEnum>>,
 }
 
 impl CompositeApi {
-    pub fn new(apis: HashMap<PictureType, Arc<GetPictureEnum>>) -> Self {
+    pub fn new(apis: Arc<HashMap<PictureType, GetPictureEnum>>) -> Self {
         Self { apis }
     }
+}
 
-    fn get_random_picture_type(&self) -> PictureType {
+impl CompositeApi {
+    fn get_random_picture_type(time_in_sec: u64, api_count: usize) -> PictureType {
+        if api_count == 0 {
+            return PictureType::Cat;
+        }
+
+        // Перевод в часы
+        let hours = (time_in_sec % (24 * 3600)) / 3600;
+
+        // Предполагаем, что у нас только два типа картинок
+        match hours % 2 {
+            0 => PictureType::Cat,
+            1 => PictureType::Dog,
+            _ => unreachable!(),
+        }
+    }
+
+    fn get_random_picture_type_by_time(api_count: usize) -> PictureType {
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap_or(Duration::from_secs(1))
             .as_secs();
 
-        // Перевод в часы
-        let total_hours = now / 3600;
-
-        // Проверка на пустой список API
-        let count = self.apis.iter().count();
-        if count == 0 {
-            return PictureType::Cat;
-        }
-
-        // Предполагаем, что у нас только два типа картинок
-        match total_hours % 2 {
-            0 => PictureType::Cat,
-            1 => PictureType::Dog,
-            _ => unreachable!(),
-        }
+        Self::get_random_picture_type(now, api_count)
     }
 }
 
@@ -51,7 +55,9 @@ impl GetPictures for CompositeApi {
         let mut limit = limit.unwrap_or(1);
 
         if limit <= 1 {
-            let picture_type = picture_type.unwrap_or(self.get_random_picture_type());
+            let picture_type = picture_type.unwrap_or(Self::get_random_picture_type_by_time(
+                self.apis.iter().count(),
+            ));
 
             return self
                 .apis
@@ -79,5 +85,26 @@ impl GetPictures for CompositeApi {
         let result = result.into_iter().take(limit as usize).collect();
 
         Ok(result)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use cat_core::contracts::PictureType;
+
+    use super::CompositeApi;
+
+    const API_COUNT: usize = 2;
+
+    #[test]
+    fn get_random_picture_type_test() {
+        let t = CompositeApi::get_random_picture_type(3600 * 0, API_COUNT);
+        assert_eq!(t, PictureType::Cat);
+
+        let t = CompositeApi::get_random_picture_type(3600 * 1, API_COUNT);
+        assert_eq!(t, PictureType::Dog);
+
+        let t = CompositeApi::get_random_picture_type(3600 * 2, API_COUNT);
+        assert_eq!(t, PictureType::Cat);
     }
 }

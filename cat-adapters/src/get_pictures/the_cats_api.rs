@@ -1,18 +1,20 @@
-use reqwest::Url;
 use cat_core::contracts::{GetPictureError, GetPictures, PictureDto, PictureType};
+use reqwest::Url;
 
-use super::get_errors;
+use super::AdapterGetPictureError;
 
 const GET_CATS_URL: &str = "https://api.thecatapi.com/v1/images/search";
 
 #[derive(Debug, Clone)]
 pub struct TheCatsApi {
-    api_key: String,
+    client: reqwest::Client,
 }
 
 impl TheCatsApi {
-    pub fn new(api_key: String) -> Self {
-        Self { api_key }
+    pub fn try_new(api_key: &str) -> Result<Self, String> {
+        let client = super::get_client(api_key)?;
+
+        Ok(Self { client })
     }
 }
 
@@ -27,17 +29,15 @@ impl GetPictures for TheCatsApi {
         let url = Url::parse_with_params(GET_CATS_URL, &params)
             .map_err(|_| GetPictureError::IncorrectUrl)?;
 
-        let client = reqwest::Client::new();
-
-        let cats: Vec<PictureDto> = client
+        let cats: Vec<PictureDto> = self
+            .client
             .get(url)
-            .header("x-api-key", &self.api_key)
             .send()
             .await
-            .map_err(get_errors)?
+            .map_err(AdapterGetPictureError::from)?
             .json()
             .await
-            .map_err(get_errors)?;
+            .map_err(AdapterGetPictureError::from)?;
 
         Ok(cats)
     }

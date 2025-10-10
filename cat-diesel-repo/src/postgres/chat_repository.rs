@@ -7,7 +7,7 @@ use cat_core::{
     shared::RepositoryError,
 };
 
-use crate::postgres::models::NewChat;
+use crate::{DbRepositoryError, postgres::models::NewChat};
 
 use super::PostgresRepository;
 
@@ -18,7 +18,11 @@ use super::{
 
 impl ChatRepository for PostgresRepository {
     async fn create(&self, input: Chat) -> Result<(), RepositoryError> {
-        let mut conn = self.pool.get().await.unwrap();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|_| RepositoryError::Connection)?;
 
         let new_chat = NewChat {
             chat_id: input.chat_id,
@@ -30,38 +34,50 @@ impl ChatRepository for PostgresRepository {
             .values(&new_chat)
             .execute(&mut conn)
             .await
-            .unwrap();
+            .map_err(DbRepositoryError::from)?;
 
         Ok(())
     }
 
     async fn get_list(&self) -> Result<Vec<Chat>, RepositoryError> {
-        let mut conn = self.pool.get().await.unwrap();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|_| RepositoryError::Connection)?;
 
         let results = chats::table
             .select(models::Chat::as_select())
             .load(&mut conn)
             .await
-            .unwrap();
+            .map_err(DbRepositoryError::from)?;
 
         Ok(results.into_iter().map(Chat::from).collect())
     }
 
     async fn get_by_id(&self, id: i64) -> Result<Chat, RepositoryError> {
-        let mut conn = self.pool.get().await.unwrap();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|_| RepositoryError::Connection)?;
 
         let result = chats::table
             .filter(chat_id.eq(id))
             .select(models::Chat::as_select())
             .first(&mut conn)
             .await
-            .unwrap();
+            .map_err(DbRepositoryError::from)?;
 
         Ok(Chat::from(result))
     }
 
     async fn update(&self, input: Chat) -> Result<(), RepositoryError> {
-        let mut conn = self.pool.get().await.unwrap();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|_| RepositoryError::Connection)?;
 
         diesel::update(chats::dsl::chats.find(input.chat_id))
             .set((
@@ -71,20 +87,24 @@ impl ChatRepository for PostgresRepository {
             ))
             .execute(&mut conn)
             .await
-            .unwrap();
+            .map_err(DbRepositoryError::from)?;
 
         Ok(())
     }
 
     async fn get_list_for_push(&self) -> Result<Vec<Chat>, RepositoryError> {
-        let mut conn = self.pool.get().await.unwrap();
+        let mut conn = self
+            .pool
+            .get()
+            .await
+            .map_err(|_| RepositoryError::Connection)?;
 
         let result = chats::table
             .filter(enable_push.eq(true))
             .select(models::Chat::as_select())
             .load(&mut conn)
             .await
-            .unwrap();
+            .map_err(DbRepositoryError::from)?;
 
         Ok(result.into_iter().map(Chat::from).collect())
     }

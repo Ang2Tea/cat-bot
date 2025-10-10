@@ -1,8 +1,8 @@
-use std::sync::Arc;
-
 use crate::entities::repositories::ChatRepository;
 
-use crate::contracts::{ChatDto, GetPictureError, GetPictures, PictureGetUC, PictureType};
+use crate::contracts::{
+    ChatDto, GetPictureError, GetPictures, PictureGetUC, PictureType, PictureUCError,
+};
 
 #[derive(Debug, Clone)]
 pub struct PictureUC<A, R>
@@ -10,8 +10,8 @@ where
     A: GetPictures,
     R: ChatRepository,
 {
-    chat_repository: Arc<R>,
-    get_pictures: Arc<A>,
+    chat_repository: R,
+    get_pictures: A,
 }
 
 impl<A, R> PictureUC<A, R>
@@ -19,7 +19,7 @@ where
     A: GetPictures,
     R: ChatRepository,
 {
-    pub fn new(get_pictures: Arc<A>, chat_repository: Arc<R>) -> Self {
+    pub fn new(get_pictures: A, chat_repository: R) -> Self {
         Self {
             get_pictures,
             chat_repository,
@@ -35,7 +35,7 @@ where
     async fn get_picture(
         &self,
         picture_type: Option<PictureType>,
-    ) -> Result<String, GetPictureError> {
+    ) -> Result<String, PictureUCError> {
         let pictures = self
             .get_pictures
             .get_pictures(picture_type, Some(1))
@@ -46,9 +46,7 @@ where
         Ok(first.url.clone())
     }
 
-    async fn get_picture_for_notification(
-        &self,
-    ) -> Result<Vec<(String, ChatDto)>, GetPictureError> {
+    async fn get_picture_for_notification(&self) -> Result<Vec<(String, ChatDto)>, PictureUCError> {
         let chats = self.chat_repository.get_list_for_push().await?;
 
         let pictures = self

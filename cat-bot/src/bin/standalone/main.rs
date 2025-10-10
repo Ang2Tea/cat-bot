@@ -25,23 +25,26 @@ async fn main() {
 
     let config = Config::init();
 
-    cat_diesel_repo::postgres::run_migrations(&config.db_url);
+    cat_diesel_repo::postgres::run_migrations(&config.db_url).unwrap();
 
-    let chat_repository = Arc::new(cat_diesel_repo::postgres::PostgresRepository::new(
-        config.db_url,
-    ));
+    let chat_repository =
+        cat_diesel_repo::postgres::PostgresRepository::try_new(config.db_url).unwrap();
 
-    let the_cats_api = Arc::new(GetPictureEnum::Cat(TheCatsApi::new(config.api_key.clone())));
-    let the_dogs_api = Arc::new(GetPictureEnum::Dog(TheDogsApi::new(config.api_key.clone())));
+    let the_cats_api = GetPictureEnum::Cat(TheCatsApi::try_new(&config.api_key).unwrap());
+    let the_dogs_api = GetPictureEnum::Dog(TheDogsApi::try_new(&config.api_key).unwrap());
 
-    let mut apis = HashMap::new();
-    apis.insert(PictureType::Cat, the_cats_api.clone());
-    apis.insert(PictureType::Dog, the_dogs_api.clone());
+    let apis = {
+        let mut apis = HashMap::new();
+        apis.insert(PictureType::Cat, the_cats_api.clone());
+        apis.insert(PictureType::Dog, the_dogs_api.clone());
 
-    let the_apis = Arc::new(CompositeApi::new(apis));
+        Arc::new(apis)
+    };
 
-    let chat_uc = Arc::new(ChatUC::new(chat_repository.clone()));
-    let picture_uc = Arc::new(PictureUC::new(the_apis.clone(), chat_repository.clone()));
+    let the_apis = CompositeApi::new(apis);
+
+    let chat_uc = ChatUC::new(chat_repository.clone());
+    let picture_uc = PictureUC::new(the_apis.clone(), chat_repository.clone());
 
     cat_bot::run(
         config.bot_token,

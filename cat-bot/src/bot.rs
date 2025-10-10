@@ -2,7 +2,7 @@ mod commands;
 mod endpoints;
 mod schemas;
 
-use std::{sync::Arc, time::Duration};
+use std::time::Duration;
 
 use endpoints::send_photo;
 use teloxide::{Bot, dptree, prelude::Dispatcher};
@@ -15,9 +15,9 @@ type BotError = Box<dyn std::error::Error + Send + Sync>;
 pub async fn run<P, CC, UC>(
     bot_token: String,
     delay_in_sec: u64,
-    picture_uc: Arc<P>,
-    create_chat_uc: Arc<CC>,
-    update_chat_uc: Arc<UC>,
+    picture_uc: P,
+    create_chat_uc: CC,
+    update_chat_uc: UC,
 ) where
     P: PictureGetUC,
     CC: ChatCreateUC,
@@ -36,7 +36,7 @@ pub async fn run<P, CC, UC>(
         .await
 }
 
-pub async fn write_image<P>(bot: Bot, delay_in_sec: u64, picture_helper: Arc<P>)
+pub async fn write_image<P>(bot: Bot, delay_in_sec: u64, picture_helper: P)
 where
     P: PictureGetUC,
 {
@@ -46,12 +46,16 @@ where
         tracing::debug!("Writing image");
 
         let chats = picture_helper.get_picture_for_notification().await;
-        if chats.is_err() {
-            tracing::warn!("Failed to get chats");
-            continue;
-        }
 
-        for (url, chat) in chats.unwrap() {
+        let chats = match chats {
+            Ok(c) => c,
+            Err(_) => {
+                tracing::warn!("Failed to get chats");
+                continue;
+            }
+        };
+
+        for (url, chat) in chats {
             let _ = send_photo(&bot, chat.chat_id, &url).await;
         }
 
