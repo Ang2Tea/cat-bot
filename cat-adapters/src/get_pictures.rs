@@ -33,22 +33,16 @@ impl From<AdapterGetPictureError> for GetPictureError {
 
 impl From<Error> for AdapterGetPictureError {
     fn from(value: Error) -> Self {
-        let err = {
-            if value.is_decode() {
-                GetPictureError::DecodeError(value.to_string());
+        let err = if value.is_status() {
+            GetPictureError::InvalidStatus {
+                status: value.status().unwrap_or(StatusCode::BAD_REQUEST).as_u16(),
+                message: value.to_string(),
             }
-
-            if value.is_status() {
-                GetPictureError::InvalidStatus {
-                    status: value.status().unwrap_or(StatusCode::BAD_REQUEST).as_u16(),
-                    message: value.to_string(),
-                };
-            }
-
-            if value.is_request() {
-                GetPictureError::RequestError(value.to_string());
-            }
-
+        } else if value.is_decode() {
+            GetPictureError::DecodeError(value.to_string())
+        } else if value.is_request() {
+            GetPictureError::RequestError(value.to_string())
+        } else {
             GetPictureError::Other(value.to_string())
         };
 

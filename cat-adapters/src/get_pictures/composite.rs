@@ -67,7 +67,7 @@ impl GetPictures for CompositeApi {
                 .await;
         };
 
-        while limit % self.apis.len() as u32 != 0 {
+        while !limit.is_multiple_of(self.apis.len() as u32) {
             limit += 1;
         }
 

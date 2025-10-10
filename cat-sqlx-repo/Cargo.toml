@@ -10,8 +10,6 @@ default = []
 postgres = ["sqlx/postgres"]
 
 [dependencies]
-tokio = { workspace = true }
-
 sqlx = { version = "0.8.6", features = ["runtime-tokio"] }
 
 cat-core = { path = "../cat-core" }

@@ -10,7 +10,4 @@ members = [
 
 [workspace.dependencies]
 tracing = "0.1.41"
-
 tokio = { version = "1.45.1", features = ["full"] }
-
-thiserror = "2.0.17"

@@ -29,7 +29,7 @@ async fn main(
 
     cat_sqlx_repo::postgres::migrate(&db_url)
         .await
-        .map_err(|e| shuttle_runtime::Error::Database(e))?;
+        .map_err(shuttle_runtime::Error::Database)?;
 
     let chat_repository = PostgresRepository::try_new(&db_url)
         .await
@@ -58,8 +58,8 @@ async fn main(
     let picture_uc = PictureUC::new(the_apis.clone(), chat_repository.clone());
 
     Ok(BotService {
-        config: config,
-        picture_uc: picture_uc,
+        config,
+        picture_uc: picture_uc.clone(),
         create_chat_uc: chat_uc.clone(),
         update_chat_uc: chat_uc.clone(),
     })

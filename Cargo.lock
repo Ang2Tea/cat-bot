@@ -185,7 +185,6 @@ dependencies = [
  "reqwest",
  "shuttle-runtime",
  "shuttle-shared-db",
- "sqlx",
  "teloxide",
  "tokio",
  "tracing",
@@ -209,7 +208,6 @@ dependencies = [
  "diesel",
  "diesel-async",
  "diesel_migrations",
- "tokio",
 ]
 
 [[package]]
@@ -218,7 +216,6 @@ version = "0.1.0"
 dependencies = [
  "cat-core",
  "sqlx",
- "tokio",
 ]
 
 [[package]]
@@ -2079,7 +2076,6 @@ dependencies = [
  "base64",
  "bytes",
  "encoding_rs",
- "futures-channel",
  "futures-core",
  "futures-util",
  "h2",
