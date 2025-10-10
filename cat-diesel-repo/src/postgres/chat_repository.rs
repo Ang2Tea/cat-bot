@@ -4,7 +4,7 @@ use diesel_async::RunQueryDsl;
 
 use cat_core::{
     entities::{chat::Chat, repositories::ChatRepository},
-    shared::{CreateChatError, GetChatError, UpdateChatError},
+    shared::RepositoryError,
 };
 
 use crate::postgres::models::NewChat;
@@ -17,7 +17,7 @@ use super::{
 };
 
 impl ChatRepository for PostgresRepository {
-    async fn create(&self, input: Chat) -> Result<(), CreateChatError> {
+    async fn create(&self, input: Chat) -> Result<(), RepositoryError> {
         let mut conn = self.pool.get().await.unwrap();
 
         let new_chat = NewChat {
@@ -35,7 +35,7 @@ impl ChatRepository for PostgresRepository {
         Ok(())
     }
 
-    async fn get_list(&self) -> Result<Vec<Chat>, GetChatError> {
+    async fn get_list(&self) -> Result<Vec<Chat>, RepositoryError> {
         let mut conn = self.pool.get().await.unwrap();
 
         let results = chats::table
@@ -47,7 +47,7 @@ impl ChatRepository for PostgresRepository {
         Ok(results.into_iter().map(Chat::from).collect())
     }
 
-    async fn get_by_id(&self, id: i64) -> Result<Chat, GetChatError> {
+    async fn get_by_id(&self, id: i64) -> Result<Chat, RepositoryError> {
         let mut conn = self.pool.get().await.unwrap();
 
         let result = chats::table
@@ -60,7 +60,7 @@ impl ChatRepository for PostgresRepository {
         Ok(Chat::from(result))
     }
 
-    async fn update(&self, input: Chat) -> Result<(), UpdateChatError> {
+    async fn update(&self, input: Chat) -> Result<(), RepositoryError> {
         let mut conn = self.pool.get().await.unwrap();
 
         diesel::update(chats::dsl::chats.find(input.chat_id))
@@ -76,7 +76,7 @@ impl ChatRepository for PostgresRepository {
         Ok(())
     }
 
-    async fn get_list_for_push(&self) -> Result<Vec<Chat>, GetChatError> {
+    async fn get_list_for_push(&self) -> Result<Vec<Chat>, RepositoryError> {
         let mut conn = self.pool.get().await.unwrap();
 
         let result = chats::table

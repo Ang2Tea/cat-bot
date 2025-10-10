@@ -1,5 +1,5 @@
 use thiserror::Error;
-use crate::shared::GetChatError;
+use crate::shared::RepositoryError;
 
 #[derive(Debug, Error)]
 pub enum GetPictureError {
@@ -15,7 +15,7 @@ pub enum GetPictureError {
     #[error("incorrect url")]
     IncorrectUrl,
     #[error(transparent)]
-    GetChatError(#[from] GetChatError),
+    RepositoryError(#[from] RepositoryError),
     #[error("сan't get picture/s")]
     NotFound,
     #[error("{0}")]

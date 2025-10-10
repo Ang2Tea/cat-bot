@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::{
     entities::{chat::Chat, repositories::ChatRepository},
-    shared::{CreateChatError, GetChatError, UpdateChatError},
+    shared::{RepositoryError},
 };
 
 use crate::contracts::{ChangeChatDto, ChatCreateUC, ChatDto, ChatGetUC, ChatUpdateUC};
@@ -28,7 +28,7 @@ impl<R> ChatCreateUC for ChatUC<R>
 where
     R: ChatRepository,
 {
-    async fn create(&self, dto: ChangeChatDto) -> Result<(), CreateChatError> {
+    async fn create(&self, dto: ChangeChatDto) -> Result<(), RepositoryError> {
         let new_chat = Chat::new(dto.chat_id, dto.name, dto.title);
 
         self.repository.create(new_chat).await
@@ -39,14 +39,14 @@ impl<R> ChatGetUC for ChatUC<R>
 where
     R: ChatRepository,
 {
-    async fn get_by_id(&self, id: i64) -> Result<ChatDto, GetChatError> {
+    async fn get_by_id(&self, id: i64) -> Result<ChatDto, RepositoryError> {
         self.repository.get_by_id(id).await.map(|chat| ChatDto {
             chat_id: chat.chat_id,
             enable_push: chat.enable_push,
         })
     }
 
-    async fn get_list(&self) -> Result<Vec<ChatDto>, GetChatError> {
+    async fn get_list(&self) -> Result<Vec<ChatDto>, RepositoryError> {
         let chats = self.repository.get_list().await.map(|chats| {
             chats
                 .iter()
@@ -65,7 +65,7 @@ impl<R> ChatUpdateUC for ChatUC<R>
 where
     R: ChatRepository,
 {
-    async fn change_push(&self, id: i64) -> Result<bool, UpdateChatError> {
+    async fn change_push(&self, id: i64) -> Result<bool, RepositoryError> {
         let mut chat = self.repository.get_by_id(id).await?;
         let current_push = !chat.enable_push;
 
