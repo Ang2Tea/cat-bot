@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use reqwest::Url;
 use teloxide::{
     Bot,
@@ -33,7 +31,7 @@ async fn get_picture<P>(
     bot: Bot,
     msg: Message,
     picture_type: PictureType,
-    picture_helper: Arc<P>,
+    picture_helper: P,
 ) -> HandlerResult
 where
     P: PictureGetUC,
@@ -51,7 +49,7 @@ where
     }
 }
 
-pub async fn start<R>(bot: Bot, chat_helper: Arc<R>, msg: Message) -> HandlerResult
+pub async fn start<R>(bot: Bot, chat_helper: R, msg: Message) -> HandlerResult
 where
     R: ChatCreateUC,
 {
@@ -76,21 +74,21 @@ where
     Ok(())
 }
 
-pub async fn get_dog<P>(bot: Bot, msg: Message, picture_helper: Arc<P>) -> HandlerResult
+pub async fn get_dog<P>(bot: Bot, msg: Message, picture_helper: P) -> HandlerResult
 where
     P: PictureGetUC,
 {
     get_picture(bot, msg, PictureType::Dog, picture_helper).await
 }
 
-pub async fn get_cat<P>(bot: Bot, msg: Message, picture_helper: Arc<P>) -> HandlerResult
+pub async fn get_cat<P>(bot: Bot, msg: Message, picture_helper: P) -> HandlerResult
 where
     P: PictureGetUC,
 {
     get_picture(bot, msg, PictureType::Cat, picture_helper).await
 }
 
-pub async fn change_push<T>(bot: Bot, msg: Message, chat_helper: Arc<T>) -> HandlerResult
+pub async fn change_push<T>(bot: Bot, msg: Message, chat_helper: T) -> HandlerResult
 where
     T: ChatUpdateUC,
 {
