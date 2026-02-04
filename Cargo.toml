@@ -1,50 +1,13 @@
-[package]
-name = "cat-bot"
-version = "0.1.0"
-edition = "2024"
-repository = "https://github.com/Ang2Tea/cat-bot"
-readme = "README.md"
+[workspace]
+resolver = "3"
+members = [
+    "cat-core",
+    "cat-adapters",
+    "cat-sqlx-repo",
+    "cat-diesel-repo",
+    "cat-bot",
+]
 
-[features]
-default = []
-shuttle = ["postgres"]
-sqlx = ["dep:sqlx"]
-postgres = ["sqlx", "sqlx/postgres"] 
-
-
-[[bin]]
-name = "cat-bot"
-path = "src/bin/shuttle/main.rs"
-required-features = ["postgres"]
-
-[[bin]]
-name = "standalone"
-path = "src/bin/standalone.rs"
-
-
-[dependencies]
-# Async
-futures = "0.3"
-tokio = { version = "1.45.1", features = ["full"] }
-
-# Logging
+[workspace.dependencies]
 tracing = "0.1.41"
-tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
-
-# Telegram API
-teloxide = { version = "0.15.0", features = ["macros"] }
-
-# HTTP Client
-serde = { version = "1.0", features = ["derive"] }
-reqwest = { version = "0.12.19", features = ["json", "blocking"] }
-
-# Databases
-sqlx = { version = "0.8.6", optional = true, features = ["runtime-tokio"] }
-
-# Utils
-thiserror = "2"
-dotenvy = "0.15"
-
-# Shuttle
-shuttle-runtime = { version = "0.55.0", features = ["tracing-subscriber"] }
-shuttle-shared-db = { version = "0.55.0", features = ["postgres", "sqlx"] }
+tokio = { version = "1.45.1", features = ["full"] }

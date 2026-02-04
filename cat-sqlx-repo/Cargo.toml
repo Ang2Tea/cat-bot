@@ -1,0 +1,15 @@
+[package]
+name = "cat-sqlx-repo"
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/Ang2Tea/cat-bot"
+readme = "README.md"
+
+[features]
+default = []
+postgres = ["sqlx/postgres"]
+
+[dependencies]
+sqlx = { version = "0.8.6", features = ["runtime-tokio"] }
+
+cat-core = { path = "../cat-core" }

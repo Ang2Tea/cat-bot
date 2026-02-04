@@ -5,9 +5,12 @@
             "name": "Start Cat Bot",
             "type": "lldb",
             "request": "launch",
-            "program": "${workspaceFolder}/target/debug/${workspaceFolderBasename}",
+            "program": "${workspaceFolder}/target/debug/standalone",
             "args": [],
             "cwd": "${workspaceFolder}",
+            "cargo": {
+                "args": ["build", "--package", "cat-bot", "--bin", "standalone"]
+            },
             "sourceLanguages": [
                 "rust"
             ]

@@ -4,6 +4,6 @@ services:
       context: ..
       dockerfile: ./Dockerfile
     env_file:
-      - ../.env
+      - cat-bot/.env
     volumes:
       - ../data:/app/data

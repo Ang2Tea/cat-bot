@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE chats \nSET \n    name = $1, \n    enable_push = $2, \n    title = $3 \nWHERE chat_id = $4;",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Bool",
+        "Varchar",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "ddc790ecbb92bb43c131cbf4509af8cbba8e395619fbcb574a462e38a01b260c"
+}
